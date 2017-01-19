@@ -1,0 +1,27 @@
+	{
+		"manifest_version": 2,
+		"name": "loli-safe Uploader",
+		"description": "Uploader for loli-safe",
+		"version": "2017.1.16.3",
+		"options_ui": {
+			"page": "settings.html",
+			"chrome_style": false,
+			"open_in_tab": true
+		},
+		"icons": {
+			"48": "logo-48x48.png",
+			"128": "logo-128x128.png"
+		},
+		"permissions": [
+			"contextMenus",
+			"storage",
+			"notifications",
+			"webRequest",
+			"webRequestBlocking",
+			"<all_urls>"
+		],
+		"background": {
+			"scripts": ["axios.min.js", "background.js"],
+			"persistent": true
+		}
+	}
