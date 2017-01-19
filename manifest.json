@@ -2,7 +2,7 @@
 		"manifest_version": 2,
 		"name": "loli-safe Uploader",
 		"description": "Uploader for loli-safe",
-		"version": "2017.1.16.3",
+		"version": "2017.1.18.1",
 		"options_ui": {
 			"page": "settings.html",
 			"chrome_style": false,
