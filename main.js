@@ -12,19 +12,17 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('save').addEventListener('click', function() {
 	let textDomain = document.getElementById('textDomain').value;
 	let textToken = document.getElementById('textToken').value;
-	let textAdminToken = document.getElementById('textAdminToken').value;
 	if (!textDomain) {
 		alert('loli-safe domain is required!');
 		return;
 	}
 	storage.set({
 		"textDomain": textDomain,
-		"textToken": textToken || null,
-		"textAdminToken": textAdminToken || null,
+		"textToken": textToken || null
 	}, function() {
 		background.createContextMenus();
-		background.createNotification('basic', 'Settings Saved!');
-		background.clearNotification();
+		let notification = background.notifications.create('basic', 'Settings Saved!');
+		background.notifications.clear(notification, 5000);
 	});
 });
 

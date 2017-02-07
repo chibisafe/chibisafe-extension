@@ -1,7 +1,7 @@
 chrome.runtime.onInstalled.addListener(function(details) {
 	if (details.reason == "update") {
 		/* == Made changes to storage names. == */
-		chrome.storage.local.clear();
+		//chrome.storage.local.clear();
 	}
 });
 
@@ -22,7 +22,7 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 
 function createContextMenus() {
 
-	if (Object.keys(config).length === 0) return;
+	if (Object.keys(config).length === 0 || !config.textDomain) return;
 
 	/* == Not the best way to do this but when have I ever done something efficiently? == */
 	chrome.contextMenus.removeAll(function() {
@@ -32,11 +32,14 @@ function createContextMenus() {
 		/* == Parent Context Menu == */
 		contextMenus.parent = chrome.contextMenus.create({
 			"title": "loli-safe",
-			"contexts": contexts
+			"contexts": ["all"],
+			"onclick": function() {
+				chrome.tabs.create({url: config.textDomain + '/dashboard'})
+			}
 		});
 
 		/* == Refresh == */
-		if (config.textAdminToken) {
+		if (config.textToken) {
 			chrome.contextMenus.create({
 				"title": "Refresh Albums List",
 				"parentId": contextMenus.parent,
@@ -63,7 +66,36 @@ function createContextMenus() {
 			"onclick": function(info) { upload(info.srcUrl, info.pageUrl) }
 		});
 
-		if (config.textAdminToken) {
+		chrome.contextMenus.create({
+			"title": "Screenshot Entire Page",
+			"parentId": contextMenus.parent,
+			"contexts": ["page"],
+			"onclick": function(info) {
+				chrome.tabs.captureVisibleTab({
+					format: 'png'
+				}, function(data) {
+					let blob = b64toBlob(data.replace('data:image/png;base64,', ''), 'image/png');
+					uploadScreenshot(blob);
+				});
+			}
+		});
+
+		// chrome.contextMenus.create({
+		// 	"title": "Screenshot Selection",
+		// 	"parentId": contextMenus.parent,
+		// 	"contexts": ["page"],
+		// 	"onclick": function(info) {
+		// 		chrome.tabs.captureVisibleTab({
+		// 			format: 'png'
+		// 		}, function() {
+		// 			chrome.tabs.query({"active": true}, function(tabs) {
+		// 				chrome.tabs.sendMessage(tabs[0].id, {action: 1});
+		// 			});
+		// 		});
+		// 	}
+		// });
+
+		if (config.textToken) {
 
 			/* == Separator == */
 			chrome.contextMenus.create({
@@ -73,15 +105,11 @@ function createContextMenus() {
 			});
 
 			axios.get(config.textDomain + '/api/albums', {
-				headers: {"auth": config.textAdminToken}
+				headers: {"token": config.textToken}
 			}).then(function(list) {
 
-				list.data.albums.forEach(function(album) {
-					console.log(album.id, album.name);
-					contextMenus.createContextMenu(album.id, album.name);
-				});
+				if (list.data.albums.length === 0) {
 
-				if (list.data.length === 0) {
 					chrome.contextMenus.create({
 						"title": "No Albums Available",
 						"parentId": contextMenus.parent,
@@ -89,6 +117,22 @@ function createContextMenus() {
 						"type": "normal",
 						"enabled": false
 					});
+
+				} else {
+
+					chrome.contextMenus.create({
+						"title": "Upload to:",
+						"parentId": contextMenus.parent,
+						"contexts": contexts,
+						"type": "normal",
+						"enabled": false
+					});
+
+					list.data.albums.forEach(function(album) {
+						console.log(album.id, album.name);
+						contextMenus.createContextMenu(album.id, album.name);
+					});
+
 				}
 
 			}).catch(function(err) {
@@ -111,7 +155,7 @@ let contextMenus = {
 	"children": {},
 	"createContextMenu": function(id, name) {
 		let CM = chrome.contextMenus.create({
-			"title": 'Upload to ' + name,
+			"title": name,
 			"parentId": contextMenus.parent,
 			"contexts": contexts,
 			"onclick": function(info) {
@@ -123,10 +167,11 @@ let contextMenus = {
 	}
 };
 
-let refererHeader = 'https://google.com';
+let refererHeader = null;
 
+/* == We need to set this header for image sources that check it for auth or to prevent hotlinking == */
 chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
-	if (details.tabId === -1 && details.method === 'GET') {
+	if (details.tabId === -1 && details.method === 'GET' && refererHeader !== null) {
 		details.requestHeaders.push({
 			"name": "Referer",
 			"value": refererHeader
@@ -140,43 +185,127 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
 }, {urls: ["<all_urls>"]}, ["blocking", "requestHeaders"]);
 
 function upload(url, pageURL, album_id) {
-	createNotification('basic', 'Retriving file...', null, null, true);
-	refererHeader = pageURL;
+
+	let notification = notifications.create('basic', 'Retriving file...', null, true);
+
+	refererHeader = pageURL; // Sets the Page URl as the referer url
+
 	axios.get(url, {responseType: 'blob'}).then(function(file) {
-		refererHeader = '';
-		createNotification('progress', 'Uploading...', null, 0, true);
+
+		refererHeader = null; // Set to null after we're done with it
+
+		notifications.update(notification, {
+			type: 'progress',
+			message: 'Uploading...',
+			progress: 0
+		});
+
 		let data = new FormData();
 		data.append('files[]', file.data, 'upload' + fileExt(file.data.type));
+
 		let options = {
+			method: 'POST',
+			url: config.textDomain + '/api/upload',
+			data: data,
 			headers: {},
 			onUploadProgress: function(progress) {
-				updateNotification({
+				notifications.update(notification, {
 					"progress": Math.round((progress.loaded * 100) / progress.total)
 				});
 			}
 		};
 
-		if (album_id && config.textAdminToken) {
-			options.headers['album'] = album_id;
-			options.headers['adminauth'] = config.textAdminToken;
+		if (config.textToken) options.headers['token'] = config.textToken;
+
+		if (album_id && config.textToken) {
+			options.url = options.url + '/' + album_id;
 		}
 
-		if (config.textToken) options.headers['auth'] = config.textToken;
-
-		axios.post(config.textDomain + '/api/upload', data, options).then(function(response) {
+		axios.request(options).then(function(response) {
 			if (response.data.success === true) {
 				copyText(response.data.files[0].url);
-				createNotification('basic', 'Upload Complete!', 'URL copied to your clipboard!');
+				notifications.update(notification, {
+					type: 'basic',
+					message: 'Upload Complete!',
+					contextMessage: 'URL copied to your clipboard!',
+				});
+				notifications.clear(notification, 5000);
 			} else {
-				createNotification('basic', 'Error', response.data.description);
+				notifications.update(notification, {
+					type: 'basic',
+					message: response.data.description,
+					contextMessage: url,
+				});
 			}
-			clearNotification();
-		}).catch(function(err, a) {
-			console.log(err, a);
-			createNotification('basic', err.toString());
-			clearNotification();
+		}).catch(function(err) {
+			console.log(err);
+			notifications.update(notification, {
+				type: 'basic',
+				message: err.toString(),
+				contextMessage: url,
+			});
+		});
+
+	});
+
+}
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+	if ('coordinates' in request) {
+		console.log(request.coordinates);
+	}
+});
+
+function uploadScreenshot(blob, album_id) {
+
+	let notification = notifications.create('progress', 'Uploading...', null, true, 0);
+
+	let data = new FormData();
+	data.append('files[]', blob, 'upload.png');
+
+	let options = {
+		method: 'POST',
+		url: config.textDomain + '/api/upload',
+		data: data,
+		headers: {},
+		onUploadProgress: function(progress) {
+			notifications.update(notification, {
+				"progress": Math.round((progress.loaded * 100) / progress.total)
+			});
+		}
+	};
+
+	if (config.textToken) options.headers['token'] = config.textToken;
+
+	if (album_id && config.textToken) {
+		options.url = options.url + '/' + album_id;
+	}
+
+	axios.request(options).then(function(response) {
+		if (response.data.success === true) {
+			copyText(response.data.files[0].url);
+			notifications.update(notification, {
+				type: 'basic',
+				message: 'Upload Complete!',
+				contextMessage: response.data.files[0].url,
+			});
+			notifications.clear(notification, 5000);
+		} else {
+			notifications.update(notification, {
+				type: 'basic',
+				message: 'Error!',
+				contextMessage: response.data.description,
+			});
+		}
+	}).catch(function(err, a) {
+		console.log(err, a);
+		notifications.update(notification, {
+			type: 'basic',
+			message: 'Error!',
+			contextMessage: err.toString(),
 		});
 	});
+
 }
 
 let mimetypes = {
@@ -196,11 +325,11 @@ let mimetypes = {
 }
 
 function fileExt(mimetype) {
-	return mimetypes[mimetype] || mimetype.split('/')[1];
+	return mimetypes[mimetype] || '.' + mimetype.split('/')[1];
 }
 
 function copyText(text) {
-	var input = document.createElement('textarea');
+	let input = document.createElement('textarea');
 	document.body.appendChild(input);
 	input.value = text;
 	input.focus();
@@ -209,30 +338,64 @@ function copyText(text) {
 	input.remove();
 }
 
-function clearNotification(time) {
-	setTimeout(function() {chrome.notifications.clear('notifications');}, time || 5000);
+
+// http://stackoverflow.com/a/16245768
+function b64toBlob(b64Data, contentType, sliceSize) {
+  contentType = contentType || '';
+  sliceSize = sliceSize || 512;
+
+  let byteCharacters = atob(b64Data);
+  let byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    let slice = byteCharacters.slice(offset, offset + sliceSize);
+
+    let byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    let byteArray = new Uint8Array(byteNumbers);
+
+    byteArrays.push(byteArray);
+  }
+
+  let blob = new Blob(byteArrays, {type: contentType});
+  return blob;
 }
 
-function updateNotification(options) {
-	chrome.notifications.update('notifications', options);
-}
-
-function createNotification(type, text, altText, progress, sticky) {
-	chrome.notifications.clear('notifications');
-	let notificationContent = {
-		type: type,
-		title: 'loli-safe',
-		message: text,
-		iconUrl: 'logo-128x128.png',
-		requireInteraction: sticky || false
+var notifications = {
+	"active": new Set(),
+	"create": function(type, text, altText, sticky, progress) {
+		let notificationContent = {
+			type: type,
+			title: 'loli-safe',
+			message: text,
+			iconUrl: 'logo-128x128.png',
+			requireInteraction: sticky || false
+		}
+		if (altText && typeof altText === 'string') notificationContent.contextMessage = altText;
+		if (progress && typeof progress === 'integer') notificationContent.progress = progress;
+		let id = 'notification_' + Date.now();
+		chrome.notifications.create(id, notificationContent, function() {
+			notifications.active.add(id);
+		});
+		return id;
+	},
+	"update": function(id, options) {
+		chrome.notifications.update(id, options);
+	},
+	"clear": function(id, timeout) {
+		setTimeout(function() {
+			chrome.notifications.clear(id);
+		}, timeout || 0);
 	}
-	if (altText && typeof altText === 'string') notificationContent.contextMessage = altText;
-	if (progress && typeof progress === 'integer') notificationContent.progress = progress;
-	chrome.notifications.create('notifications', notificationContent, function() {
-		console.log("Last Error:", chrome.runtime.lastError);
-	});
 }
 
-chrome.notifications.onClicked.addListener(function() {
-	chrome.notifications.clear('notifications');
+chrome.notifications.onClicked.addListener(function(id) {
+	chrome.notifications.clear(id);
+});
+
+chrome.notifications.onClosed.addListener(function(id) {
+	notifications.active.delete(id);
 });
