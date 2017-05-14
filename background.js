@@ -155,7 +155,7 @@ let contextMenus = {
 	"children": {},
 	"createContextMenu": function(id, name) {
 		let CM = chrome.contextMenus.create({
-			"title": name,
+			"title": name.replace('&', '&&'),
 			"parentId": contextMenus.parent,
 			"contexts": contexts,
 			"onclick": function(info) {
