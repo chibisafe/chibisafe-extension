@@ -1,8 +1,8 @@
 	{
 		"manifest_version": 2,
-		"name": "loli-safe Uploader",
-		"description": "Uploader for loli-safe",
-		"version": "2017.2.5.1",
+		"name": "lolisafe Uploader",
+		"description": "Uploader for lolisafe",
+		"version": "2017.5.28.1",
 		"options_ui": {
 			"page": "settings.html",
 			"chrome_style": false,
