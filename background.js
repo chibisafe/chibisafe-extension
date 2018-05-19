@@ -34,7 +34,8 @@ storage.get({
 	domain: '',
 	panelURL: '/dashboard',
 	token: '',
-	lastAlbum: null
+	lastAlbum: null,
+	autoCopyUrl: false
 }, (items) => {
 	config = items;
 	createContextMenus();
@@ -294,11 +295,14 @@ function upload(url, pageURL, albumID, albumName) {
 						type: 'basic',
 						message: 'Upload Complete!',
 						contextMessage: response.data.files[0].url,
-						buttons: [{ title: 'Copy to clipboard' }]
+						buttons: config.autoCopyUrl ? [] : [{ title: 'Copy to clipboard' }]
 					});
 				} else {
 					createNotification('basic', 'Upload Complete!');
 				}
+
+				if (config.autoCopyUrl)
+					copyText(response.data.files[0].url);
 
 				contentURL = response.data.files[0].url;
 
@@ -374,11 +378,14 @@ function uploadScreenshot(blob, albumID) {
 					type: 'basic',
 					message: 'Upload Complete!',
 					contextMessage: response.data.files[0].url,
-					buttons: [{ title: 'Copy to clipboard' }]
+					buttons: config.autoCopyUrl ? [] : [{ title: 'Copy to clipboard' }]
 				});
 			} else {
 				createNotification('basic', 'Upload Complete!');
 			}
+
+			if (config.autoCopyUrl)
+				copyText(response.data.files[0].url);
 
 			contentURL = response.data.files[0].url;
 
@@ -489,9 +496,17 @@ function createNotification(type, message, altText, sticky, progress) {
 
 }
 
-chrome.notifications.onClicked.addListener((id) => chrome.notifications.clear(id));
-chrome.notifications.onButtonClicked.addListener(() => copyText(contentURL));
-chrome.notifications.onClosed.addListener(() => contentURL = '');
+chrome.notifications.onClicked.addListener((id) => {
+	chrome.notifications.clear(id)
+});
+
+chrome.notifications.onClosed.addListener(() => {
+	contentURL = '';
+});
+
+chrome.notifications.onButtonClicked.addListener(() => {
+	if (!config.autoCopyUrl) copyText(contentURL);
+});
 
 const mimetypes = {
 	'image/png': '.png',
