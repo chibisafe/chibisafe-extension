@@ -1,1 +1,1 @@
-# loli-safe-extension
+# lolisafe-extension

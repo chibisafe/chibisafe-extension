@@ -2,7 +2,8 @@
 		"manifest_version": 2,
 		"name": "lolisafe Uploader",
 		"description": "Uploader for lolisafe",
-		"version": "2017.5.28.1",
+		"version": "2018.5.18.1",
+		"version_name": "Biribiri",
 		"options_ui": {
 			"page": "settings.html",
 			"chrome_style": false,
@@ -22,7 +23,14 @@
 			"<all_urls>"
 		],
 		"background": {
-			"scripts": ["axios.min.js", "background.js"],
+			"scripts": [
+				"axios.min.js",
+				"background.js"
+			],
 			"persistent": true
-		}
+		},
+		"web_accessible_resources": [
+			"content.js",
+			"content.css"
+		]
 	}
