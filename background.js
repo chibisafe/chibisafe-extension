@@ -152,7 +152,7 @@ function createContextMenus() {
 						parentId: contextMenus.parent,
 						contexts: contexts,
 						enabled: !!lastAlbum,
-						onclick: (info) => upload(info.srcUrl, info.pageUrl, lastAlbum ? lastAlbum.id : -1)
+						onclick: (info) => upload(info.srcUrl, info.pageUrl, lastAlbum.id, lastAlbum.name)
 					});
 
 					/* == Separator == */
@@ -241,6 +241,7 @@ function upload(url, pageURL, albumID, albumName) {
 	if (albumID)
 		storage.set({ lastAlbum: albumID }, () => {
 			chrome.contextMenus.update(contextMenus.lastAlbum, {
+				enabled: true,
 				title: `Upload to: ${albumName}`,
 				onclick: (info) => upload(info.srcUrl, info.pageUrl, albumID, albumName)
 			});
