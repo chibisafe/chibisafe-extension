@@ -41,8 +41,10 @@ storage.get({
 });
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
-	for (key in changes) 
+	for (key in changes) {
 		config[key] = changes[key].newValue;
+		if (key === 'token') createContextMenus();
+	}
 });
 
 function createContextMenus() {
@@ -198,6 +200,7 @@ function createContextMenus() {
 let contextMenus = {
 	parent: null,
 	albumsParent: null,
+	lastAlbum: null,
 	createAlbumMenu: (id, name, enabled = true) => {
 		chrome.contextMenus.create({
 			title: name.replace('&', '&&'),
@@ -234,6 +237,14 @@ chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
 }, {urls: ['<all_urls>']}, ['blocking', 'requestHeaders']);
 
 function upload(url, pageURL, albumID, albumName) {
+
+	if (albumID)
+		storage.set({ lastAlbum: albumID }, () => {
+			chrome.contextMenus.update(contextMenus.lastAlbum, {
+				title: `Upload to: ${albumName}`,
+				onclick: (info) => upload(info.srcUrl, info.pageUrl, albumID, albumName)
+			});
+		});
 
 	let notification = createNotification('basic', 'Retriving file...', null, true);
 
@@ -287,9 +298,6 @@ function upload(url, pageURL, albumID, albumName) {
 				} else {
 					createNotification('basic', 'Upload Complete!');
 				}
-
-				if (albumID)
-					storage.set({ lastAlbum: albumID }, () => createContextMenus());
 
 				contentURL = response.data.files[0].url;
 
