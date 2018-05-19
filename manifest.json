@@ -2,7 +2,7 @@
 		"manifest_version": 2,
 		"name": "lolisafe Uploader",
 		"description": "Uploader for lolisafe",
-		"version": "2018.5.18.1",
+		"version": "2018.5.18.2",
 		"version_name": "Biribiri",
 		"options_ui": {
 			"page": "settings.html",
