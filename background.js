@@ -1,3 +1,5 @@
+/* global chrome axios */
+
 const storage = chrome.storage.local;
 
 const isFirefox = typeof InstallTrigger !== 'undefined';
@@ -41,8 +43,8 @@ storage.get({
 	createContextMenus();
 });
 
-chrome.storage.onChanged.addListener((changes, namespace) => {
-	for (key in changes) {
+chrome.storage.onChanged.addListener((changes) => {
+	for (const key in changes) {
 		config[key] = changes[key].newValue;
 		if (key === 'token') createContextMenus();
 	}
@@ -77,7 +79,7 @@ function createContextMenus() {
 			title: 'Screenshot page',
 			parentId: contextMenus.parent,
 			contexts: ['page'],
-			onclick: (info) => {
+			onclick: () => {
 				chrome.tabs.captureVisibleTab({ format: 'png' }, (data) => {
 					let blob = b64toBlob(data.replace('data:image/png;base64,', ''), 'image/png');
 					uploadScreenshot(blob);
@@ -90,7 +92,7 @@ function createContextMenus() {
 			title: 'Screenshot selection',
 			parentId: contextMenus.parent,
 			contexts: ['page'],
-			onclick: (info) => {
+			onclick: () => {
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 					chrome.tabs.sendMessage(tabs[0].id, 'check', (response) => {
 						if (response) {
@@ -215,6 +217,7 @@ let contextMenus = {
 
 let refererHeader = null;
 let contentURL = '';
+let recentlyUploaded = new Map();
 
 /* == We need to set this header for image sources that check it for auth or to prevent hotlinking == */
 chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
@@ -235,7 +238,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
 
 	return {requestHeaders: details.requestHeaders};
 
-}, {urls: ['<all_urls>']}, ['blocking', 'requestHeaders']);
+}, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders', 'extraHeaders']);
 
 function upload(url, pageURL, albumID, albumName) {
 
@@ -290,12 +293,14 @@ function upload(url, pageURL, albumID, albumName) {
 
 			if (response.data.success === true || response.data.files) {
 
+				recentlyUploaded.set(notification, response.data.files[0].name);
+
 				if (!isFirefox) {
 					chrome.notifications.update(notification, {
 						type: 'basic',
 						message: 'Upload Complete!',
 						contextMessage: response.data.files[0].url,
-						buttons: config.autoCopyUrl ? [] : [{ title: 'Copy to clipboard' }]
+						buttons: config.autoCopyUrl ? [] : [{ title: 'Copy to clipboard' }, { title: 'Delete Upload' }]
 					});
 				} else {
 					createNotification('basic', 'Upload Complete!');
@@ -340,6 +345,24 @@ function upload(url, pageURL, albumID, albumName) {
 
 	});
 
+}
+
+function deleteFile(filename) {
+	let headers = {
+		token: config.token
+	};
+	axios.get(`${config.domain}/api/uploads/0`, { headers }).then(response => {
+		let file = response.data.files.find(a => a.name === filename);
+		return axios.post(`${config.domain}/api/upload/delete`, { id: file.id }, { headers }).then(res => {
+			if (res.data.success) {
+				createNotification('basic', `File ${filename} was deleted!`);
+			} else {
+				createNotification('basic', 'Error\nUnable to delete the file.');
+			}
+		});
+	}).catch(() => {
+		createNotification('basic', 'Error\nUnable to delete the file.');
+	});
 }
 
 function uploadScreenshot(blob, albumID) {
@@ -422,7 +445,7 @@ function uploadScreenshot(blob, albumID) {
 
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request) => {
 
 	if ('coordinates' in request) {
 
@@ -485,7 +508,7 @@ function createNotification(type, message, altText, sticky, progress) {
 	if (altText && typeof altText === 'string')
 		notificationContent.contextMessage = altText;
 
-	if (progress && typeof progress === 'integer')
+	if (progress && typeof progress === 'number')
 		notificationContent.progress = progress;
 
 	let id = 'notification_' + Date.now();
@@ -497,15 +520,18 @@ function createNotification(type, message, altText, sticky, progress) {
 }
 
 chrome.notifications.onClicked.addListener((id) => {
-	chrome.notifications.clear(id)
+	chrome.notifications.clear(id);
 });
 
-chrome.notifications.onClosed.addListener(() => {
+chrome.notifications.onClosed.addListener((id) => {
+	recentlyUploaded.delete(id);
 	contentURL = '';
 });
 
-chrome.notifications.onButtonClicked.addListener(() => {
-	if (!config.autoCopyUrl) copyText(contentURL);
+chrome.notifications.onButtonClicked.addListener((id, index) => {
+	if (!config.autoCopyUrl && index === 0) copyText(contentURL);
+	if (index === 1) deleteFile(recentlyUploaded.get(id));
+	chrome.notifications.clear(id);
 });
 
 const mimetypes = {
@@ -522,7 +548,7 @@ const mimetypes = {
 	'audio/ogg': '.ogg',
 	'audio/x-aac': '.aac',
 	'audio/x-wav': '.wav'
-}
+};
 
 function fileExt(mimetype) {
 	return mimetypes[mimetype] || '.' + mimetype.split('/')[1];
