@@ -219,6 +219,13 @@ let refererHeader = null;
 let contentURL = '';
 let recentlyUploaded = new Map();
 
+let opt_extraInfoSpec = ['blocking', 'requestHeaders'];
+
+const chromeVersionCheck = navigator.userAgent.match(/Chrome\/(\d+)/);
+
+if (chromeVersionCheck && parseInt(chromeVersionCheck[1]) >= 72)
+	opt_extraInfoSpec.push('extraHeaders');
+
 /* == We need to set this header for image sources that check it for auth or to prevent hotlinking == */
 chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
 
@@ -238,7 +245,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
 
 	return {requestHeaders: details.requestHeaders};
 
-}, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders', 'extraHeaders']);
+}, { urls: ['<all_urls>'] }, opt_extraInfoSpec);
 
 function upload(url, pageURL, albumID, albumName) {
 
