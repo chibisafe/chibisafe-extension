@@ -40,6 +40,10 @@ storage.get({
 	autoCopyUrl: false
 }, (items) => {
 	config = items;
+	config = {
+		...config,
+		accept: 'application/vnd.lolisafe.json'
+	}
 	createContextMenus();
 });
 
@@ -132,8 +136,11 @@ function createContextMenus() {
 				type: 'separator'
 			});
 
-			axios.get(config.domain + '/api/albums', {
-				headers: { token: config.token }
+			axios.get(config.domain + '/api/albums/dropdown', {
+				headers: {
+					token: config.token,
+					accept: config.accept
+				}
 			}).then((list) => {
 
 				if (list.data.albums.length === 0) {
@@ -282,7 +289,8 @@ function upload(url, pageURL, albumID, albumName) {
 			url: `${config.domain}/api/upload`,
 			data,
 			headers: {
-				token: config.token
+				token: config.token,
+				accept: config.accept
 			},
 			onUploadProgress: (progress) => {
 				if (!isFirefox) {
@@ -293,8 +301,7 @@ function upload(url, pageURL, albumID, albumName) {
 			}
 		};
 
-		if (albumID && config.token)
-			options.url = options.url + '/' + albumID;
+		if (albumID && config.token) options.headers.albumid = albumID;
 
 		axios.request(options).then((response) => {
 
@@ -356,7 +363,8 @@ function upload(url, pageURL, albumID, albumName) {
 
 function deleteFile(filename) {
 	let headers = {
-		token: config.token
+		token: config.token,
+		accept: config.accept
 	};
 	axios.get(`${config.domain}/api/uploads/0`, { headers }).then(response => {
 		let file = response.data.files.find(a => a.name === filename);
@@ -385,7 +393,8 @@ function uploadScreenshot(blob, albumID) {
 		url: `${config.domain}/api/upload`,
 		data,
 		headers: {
-			token: config.token
+			token: config.token,
+			accept: config.accept
 		},
 		onUploadProgress: (progress) => {
 			if (!isFirefox) {

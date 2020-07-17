@@ -2,8 +2,8 @@
 		"manifest_version": 2,
 		"name": "lolisafe Uploader",
 		"description": "Uploader for lolisafe",
-		"version": "2019.1.24.1",
-		"version_name": "Biribiri",
+		"version": "2020.7.18.1",
+		"version_name": "Holo",
 		"options_ui": {
 			"page": "settings.html",
 			"chrome_style": false,
