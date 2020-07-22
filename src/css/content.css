@@ -1,4 +1,4 @@
-#loli-lasso {
+#lolisafe-lasso {
 	position: fixed;
 	border: 1px dotted;
 	background: rgba(255, 255, 255, 0.1);
@@ -10,7 +10,7 @@
 	z-index: 999;
 }
 
-body.loli-filter:after {
+body.lolisafe-filter:after {
 	content: '';
 	position: fixed;
 	top: 0;

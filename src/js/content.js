@@ -10,7 +10,7 @@ function setStyles(element, styles) {
 }
 
 const loliLasso = document.createElement('div');
-loliLasso.setAttribute('id', 'loli-lasso');
+loliLasso.setAttribute('id', 'lolisafe-lasso');
 document.body.appendChild(loliLasso);
 
 let firstPos;
@@ -20,7 +20,7 @@ const captureFunctions = {
 	mousedown: event => {
 		if (event.buttons !== 1) return;
 
-		setStyles('#loli-lasso', {
+		setStyles('#lolisafe-lasso', {
 			display: 'block',
 			top: `${event.clientY}px`,
 			left: `${event.clientX}px`,
@@ -31,13 +31,13 @@ const captureFunctions = {
 	mousemove: event => {
 		if (event.buttons !== 1) return;
 
-		const originalTop = $('#loli-lasso').style.top;
-		const originalLeft = $('#loli-lasso').style.left;
+		const originalTop = $('#lolisafe-lasso').style.top;
+		const originalLeft = $('#lolisafe-lasso').style.left;
 
 		const height = event.clientY - firstPos.y;
 		const width = event.clientX - firstPos.x;
 
-		setStyles('#loli-lasso', {
+		setStyles('#lolisafe-lasso', {
 			top: (height > 0)
 				? originalTop
 				: `${event.clientY}px`,
@@ -55,14 +55,14 @@ const captureFunctions = {
 	mouseup: event => {
 		if (event.which !== 1) return;
 
-		document.body.classList.remove('loli-filter');
+		document.body.classList.remove('lolisafe-filter');
 
 		setStyles('body', {
 			cursor: 'initial',
 			userSelect: 'initial',
 		});
 
-		setStyles('#loli-lasso', {
+		setStyles('#lolisafe-lasso', {
 			display: 'none',
 			top: 0, left: 0,
 			height: 0, width: 0,
@@ -93,7 +93,7 @@ browser.runtime.onMessage.addListener((request, sender) => {
 				userSelect: 'none',
 			});
 
-			document.body.classList.add('loli-filter');
+			document.body.classList.add('lolisafe-filter');
 
 			document.addEventListener('mousedown', captureFunctions.mousedown);
 			document.addEventListener('mousemove', captureFunctions.mousemove);
