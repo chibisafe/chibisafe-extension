@@ -440,6 +440,8 @@ class LoliSafeUploader {
 					Helpers.copyText(file.url);
 				}
 
+				notification.clear(5e3);
+
 				if (albumID) {
 					browser.storage.local.set({ lastAlbum: albumID }).then(() => {
 						browser.contextMenus.update(this.contextMenus.lastAlbum, {
@@ -502,6 +504,8 @@ class LoliSafeUploader {
 				if (this.config.autoCopyUrl) {
 					Helpers.copyText(file.url);
 				}
+
+				notification.clear(5e3);
 			} else {
 				/* This should only ever fire on instances lower than 4.0 */
 				notification.update({
