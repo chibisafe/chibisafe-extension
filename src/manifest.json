@@ -5,13 +5,13 @@
 		"version": "2020.7.18.1",
 		"version_name": "Holo",
 		"options_ui": {
-			"page": "settings.html",
+			"page": "settings/settings.html",
 			"chrome_style": false,
 			"open_in_tab": true
 		},
 		"icons": {
-			"48": "logo-48x48.png",
-			"128": "logo-128x128.png"
+			"48": "images/logo-48x48.png",
+			"128": "images/logo-128x128.png"
 		},
 		"permissions": [
 			"contextMenus",
@@ -24,13 +24,10 @@
 		],
 		"background": {
 			"scripts": [
-				"axios.min.js",
-				"background.js"
+				"js/browser-polyfill.min.js",
+				"js/axios.min.js",
+				"js/background.js"
 			],
 			"persistent": true
-		},
-		"web_accessible_resources": [
-			"content.js",
-			"content.css"
-		]
+		}
 	}
