@@ -386,6 +386,16 @@ class LoliSafeUploader {
 			requireInteraction: true,
 		});
 
+		if (albumID) {
+			browser.storage.local.set({ lastAlbum: albumID }).then(() => {
+				browser.contextMenus.update(this.contextMenus.lastAlbum, {
+					title: `Upload to: ${albumName}`,
+					enabled: true,
+					onclick: info => this.uploadFile(info.srcUrl, info.pageUrl, albumID, albumName),
+				});
+			}).catch(() => {});
+		}
+
 		refererHeader = pageURL;
 
 		try {
@@ -441,16 +451,6 @@ class LoliSafeUploader {
 				}
 
 				notification.clear(5e3);
-
-				if (albumID) {
-					browser.storage.local.set({ lastAlbum: albumID }).then(() => {
-						browser.contextMenus.update(this.contextMenus.lastAlbum, {
-							title: `Upload to: ${albumName}`,
-							enabled: true,
-							onclick: info => this.uploadFile(info.srcUrl, info.pageUrl, albumID, albumName),
-						});
-					}).catch(() => {});
-				}
 			} else {
 				/* This should only ever fire on instances lower than 4.0 */
 				notification.update({
