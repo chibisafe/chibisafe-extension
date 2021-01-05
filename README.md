@@ -1,1 +1,1 @@
-# lolisafe-extension
+# chibisafe-extension

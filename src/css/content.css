@@ -1,4 +1,4 @@
-#lolisafe-lasso {
+#chibisafe-lasso {
 	position: fixed;
 	border: 1px dotted;
 	background: rgba(255, 255, 255, 0.1);
@@ -10,7 +10,7 @@
 	z-index: 999;
 }
 
-body.lolisafe-filter:after {
+body.chibisafe-filter:after {
 	content: '';
 	position: fixed;
 	top: 0;

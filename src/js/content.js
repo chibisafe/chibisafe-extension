@@ -1,4 +1,4 @@
-console.log('%c lolisafe %c loaded ', 'background:#35495e ; padding: 1px; border-radius: 3px 0 0 3px;  color: #fff', 'background:#ff015b; padding: 1px; border-radius: 0 3px 3px 0; color: #fff');
+console.log('%c chibisafe %c loaded ', 'background:#35495e ; padding: 1px; border-radius: 3px 0 0 3px;  color: #fff', 'background:#ff015b; padding: 1px; border-radius: 0 3px 3px 0; color: #fff');
 
 const $ = el => document.querySelector(el);
 
@@ -9,9 +9,9 @@ function setStyles(element, styles) {
 	}
 }
 
-const loliLasso = document.createElement('div');
-loliLasso.setAttribute('id', 'lolisafe-lasso');
-document.body.appendChild(loliLasso);
+const chibiLasso = document.createElement('div');
+chibiLasso.setAttribute('id', 'chibisafe-lasso');
+document.body.appendChild(chibiLasso);
 
 let firstPos;
 let secondPos;
@@ -20,7 +20,7 @@ const captureFunctions = {
 	mousedown: event => {
 		if (event.buttons !== 1) return;
 
-		setStyles('#lolisafe-lasso', {
+		setStyles('#chibisafe-lasso', {
 			display: 'block',
 			top: `${event.clientY}px`,
 			left: `${event.clientX}px`,
@@ -31,13 +31,13 @@ const captureFunctions = {
 	mousemove: event => {
 		if (event.buttons !== 1) return;
 
-		const originalTop = $('#lolisafe-lasso').style.top;
-		const originalLeft = $('#lolisafe-lasso').style.left;
+		const originalTop = $('#chibisafe-lasso').style.top;
+		const originalLeft = $('#chibisafe-lasso').style.left;
 
 		const height = event.clientY - firstPos.y;
 		const width = event.clientX - firstPos.x;
 
-		setStyles('#lolisafe-lasso', {
+		setStyles('#chibisafe-lasso', {
 			top: (height > 0)
 				? originalTop
 				: `${event.clientY}px`,
@@ -55,14 +55,14 @@ const captureFunctions = {
 	mouseup: event => {
 		if (event.which !== 1) return;
 
-		document.body.classList.remove('lolisafe-filter');
+		document.body.classList.remove('chibisafe-filter');
 
 		setStyles('body', {
 			cursor: 'initial',
 			userSelect: 'initial',
 		});
 
-		setStyles('#lolisafe-lasso', {
+		setStyles('#chibisafe-lasso', {
 			display: 'none',
 			top: 0, left: 0,
 			height: 0, width: 0,
@@ -93,7 +93,7 @@ browser.runtime.onMessage.addListener((request, sender) => {
 				userSelect: 'none',
 			});
 
-			document.body.classList.add('lolisafe-filter');
+			document.body.classList.add('chibisafe-filter');
 
 			document.addEventListener('mousedown', captureFunctions.mousedown);
 			document.addEventListener('mousemove', captureFunctions.mousemove);

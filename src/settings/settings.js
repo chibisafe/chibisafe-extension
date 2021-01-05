@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 		const autoCopyUrl = $('autoCopyUrl').checked;
 
 		if (!domain) {
-			return alert('lolisafe domain is required!'); // eslint-disable-line
+			return alert('chibisafe domain is required!'); // eslint-disable-line
 		}
 
 		browser.storage.local.set({ domain, token, autoCopyUrl }).then(() => {

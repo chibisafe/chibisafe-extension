@@ -1,7 +1,7 @@
 	{
 		"manifest_version": 2,
-		"name": "lolisafe Uploader",
-		"description": "Uploader for lolisafe",
+		"name": "chibisafe Uploader",
+		"description": "Uploader for chibisafe",
 		"version": "2020.7.18.1",
 		"version_name": "Holo",
 		"options_ui": {

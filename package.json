@@ -1,8 +1,8 @@
 {
-	"name": "loli-safe-extension",
+	"name": "chibisafe-extension",
 	"version": "1.0.0",
-	"description": "Uploader for lolisafe.",
-	"repository": "https://github.com/WeebDev/loli-safe-extension.git",
+	"description": "Uploader for chibisafe.",
+	"repository": "https://github.com/WeebDev/chibisafe-extension.git",
 	"author": "pilar6195 (https://github.com/pilar6195)",
 	"license": "MIT",
 	"engines": {

@@ -91,7 +91,7 @@ window.Notification = class Notification { // eslint-disable-line
 	constructor(options) {
 		this.content = Object.assign({
 			type: 'basic',
-			title: 'lolisafe',
+			title: 'chibisafe',
 			silent: true,
 			iconUrl: 'images/logo-128x128.png',
 		}, options);
@@ -175,7 +175,7 @@ browser.webRequest.onBeforeSendHeaders.addListener(details => {
 
 /*  */
 
-class LoliSafeUploader {
+class chibisafeUploader {
 	constructor() {
 		this.version = '';
 		this.contexts = ['image', 'video', 'audio'];
@@ -208,7 +208,7 @@ class LoliSafeUploader {
 		if (!this.config.domain) return;
 
 		const headers = {
-			accept: 'application/vnd.lolisafe.json',
+			accept: 'application/vnd.chibisafe.json',
 		};
 
 		if (this.config.token) {
@@ -240,7 +240,7 @@ class LoliSafeUploader {
 
 		/* Parent Context Menu */
 		this.contextMenus.parent = browser.contextMenus.create({
-			title: 'lolisafe',
+			title: 'chibisafe',
 			contexts: ['all'],
 			onclick: () => browser.tabs.create({ url: this.config.domain + this.config.panelURL }),
 		});
@@ -554,7 +554,7 @@ class LoliSafeUploader {
 	}
 }
 
-window.uploader = new LoliSafeUploader();
+window.uploader = new chibisafeUploader();
 
 browser.runtime.onMessage.addListener(request => {
 	if ('coordinates' in request) {
