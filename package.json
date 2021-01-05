@@ -9,8 +9,8 @@
 		"node": ">=8.0.0"
 	},
 	"dependencies": {
-		"eslint": "^7.4.0",
-		"eslint-config-aqua": "^7.2.4"
+		"eslint": "^7.17.0",
+		"eslint-config-aqua": "^8.0.0"
 	},
 	"eslintConfig": {
 		"extends": [
