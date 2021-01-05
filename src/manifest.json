@@ -2,7 +2,7 @@
 		"manifest_version": 2,
 		"name": "chibisafe Uploader",
 		"description": "Uploader for chibisafe",
-		"version": "2020.7.18.1",
+		"version": "2021.1.4.0",
 		"version_name": "Holo",
 		"options_ui": {
 			"page": "settings/settings.html",
