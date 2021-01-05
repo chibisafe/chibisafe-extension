@@ -17,7 +17,6 @@
 			"contextMenus",
 			"storage",
 			"notifications",
-			"tabs",
 			"webRequest",
 			"webRequestBlocking",
 			"<all_urls>"
