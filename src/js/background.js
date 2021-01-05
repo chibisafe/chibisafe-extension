@@ -208,7 +208,7 @@ class chibisafeUploader {
 		if (!this.config.domain) return;
 
 		const headers = {
-			accept: 'application/vnd.chibisafe.json',
+			accept: 'application/vnd.chibisafe.json, application/vnd.lolisafe.json',
 		};
 
 		if (this.config.token) {
