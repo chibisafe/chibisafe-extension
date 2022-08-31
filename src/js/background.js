@@ -96,6 +96,11 @@ window.Notification = class Notification { // eslint-disable-line
 			iconUrl: 'images/logo-128x128.png',
 		}, options);
 
+		// Firefox does not support "silent"
+		if (Helpers.isFirefox) {
+			delete this.content.silent;
+		}
+
 		this.callbacks = {};
 
 		this._setup(options);
