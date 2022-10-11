@@ -10,7 +10,7 @@
 	},
 	"scripts": {
 		"dev:edge": "web-ext run -s src -t chromium --chromium-binary \"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\" -u https://chibisafe.moe",
-		"dev:edgedev": "web-ext run -s src -t chromium --chromium-binary \"C:\\Program Files (x86)\\Microsoft\\Edge Dev\\Application\\msedge.exe\" -u https://chibisafe.moe",
+		"dev:edgedev": "web-ext run -s src -t chromium --chromium-binary \"C:\\Program Files (x86)\\Microsoft\\Edge Dev\\Application\\msedge.exe\" -u https://chibisafe.moe"
 	},
 	"devDependencies": {
 		"eslint": "^8.25.0",
