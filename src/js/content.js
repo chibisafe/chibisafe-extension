@@ -4,14 +4,15 @@ const $ = el => document.querySelector(el);
 
 function setStyles(element, styles) {
 	const el = document.querySelector(element);
-	for (const style in styles) { // eslint-disable-line
-		el.style[style] = styles[style];
+	for (const [key, style] of Object.entries(styles)) {
+		el.style[key] = style;
 	}
 }
 
+// Create laso element to be used when selecting the portion of the page to screenshot.
 const chibiLasso = document.createElement('div');
 chibiLasso.setAttribute('id', 'chibisafe-lasso');
-document.body.appendChild(chibiLasso);
+document.body.append(chibiLasso);
 
 let firstPos;
 let secondPos;
@@ -64,8 +65,10 @@ const captureFunctions = {
 
 		setStyles('#chibisafe-lasso', {
 			display: 'none',
-			top: 0, left: 0,
-			height: 0, width: 0,
+			top: 0,
+			left: 0,
+			height: 0,
+			width: 0,
 		});
 
 		secondPos = {
@@ -81,13 +84,23 @@ const captureFunctions = {
 		document.removeEventListener('mousemove', captureFunctions.mousemove);
 		document.removeEventListener('mouseup', captureFunctions.mouseup);
 
-		setTimeout(() => browser.runtime.sendMessage({ coordinates: [firstPos, secondPos] }), 100);
+		setTimeout(() => {
+			browser.runtime.sendMessage({
+				action: 'screenshotCoordinates',
+				data: {
+					start: firstPos,
+					end: secondPos,
+				},
+			});
+		}, 100);
 	},
 };
 
-browser.runtime.onMessage.addListener((request, sender) => {
-	switch (request) {
-		case 'select': {
+browser.runtime.onMessage.addListener(request => {
+	const { action, data } = request;
+
+	switch (action) {
+		case 'startScreenshotSelection': {
 			setStyles('body', {
 				cursor: 'crosshair',
 				userSelect: 'none',
@@ -98,10 +111,41 @@ browser.runtime.onMessage.addListener((request, sender) => {
 			document.addEventListener('mousedown', captureFunctions.mousedown);
 			document.addEventListener('mousemove', captureFunctions.mousemove);
 			document.addEventListener('mouseup', captureFunctions.mouseup);
+
+			break;
 		}
 
-		case 'check': {
+		case 'checkIfLoaded': {
 			return Promise.resolve(true);
 		}
+
+		case 'copyToClipboard': {
+			// navigator.clipboard.writeText(data);
+
+			const input = document.createElement('textarea');
+			input.value = data;
+			input.setAttribute('readonly', '');
+			input.style.position = 'absolute';
+			input.style.left = '-9999px';
+			document.body.append(input);
+			input.select();
+			document.execCommand('copy');
+			input.remove();
+
+			/* const input = document.createElement('textarea');
+			input.value = data;
+			input.focus();
+			input.select();
+			document.execCommand('copy');
+			input.remove(); */
+
+			break;
+		}
+
+		default: {
+			return false;
+		}
 	}
+
+	return false;
 });

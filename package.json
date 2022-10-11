@@ -1,20 +1,27 @@
 {
 	"name": "chibisafe-extension",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Uploader for chibisafe.",
 	"repository": "https://github.com/WeebDev/chibisafe-extension.git",
 	"author": "pilar6195 (https://github.com/pilar6195)",
 	"license": "MIT",
 	"engines": {
-		"node": ">=8.0.0"
+		"node": "14.0.0"
 	},
-	"dependencies": {
-		"eslint": "^7.17.0",
-		"eslint-config-aqua": "^8.0.0"
+	"scripts": {
+		"dev:edge": "web-ext run -s src -t chromium --chromium-binary \"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\" -u https://chibisafe.moe",
+		"dev:edgedev": "web-ext run -s src -t chromium --chromium-binary \"C:\\Program Files (x86)\\Microsoft\\Edge Dev\\Application\\msedge.exe\" -u https://chibisafe.moe",
+	},
+	"devDependencies": {
+		"eslint": "^8.25.0",
+		"eslint-config-neon": "^0.1.37",
+		"web-ext": "^7.2.0"
 	},
 	"eslintConfig": {
 		"extends": [
-			"aqua"
+			"neon/common",
+			"neon/browser",
+			"neon/prettier"
 		],
 		"env": {
 			"browser": true,
@@ -22,26 +29,48 @@
 			"webextensions": true
 		},
 		"ignorePatterns": [
-			"axios.min.js",
 			"browser-polyfill.min.js"
 		],
 		"rules": {
+			"object-curly-spacing": 2,
+			"padded-blocks": 2,
 			"func-names": 0,
-			"curly": 0,
-			"max-len": 0,
 			"id-length": 0,
-			"no-invalid-this": 0,
-			"no-console": 0,
-			"no-unused-expressions": [
-				"error",
+			"indent": [
+				2,
+				"tab",
 				{
-					"allowTernary": true
+					"SwitchCase": 1
 				}
 			],
+			"semi": [
+				2,
+				"always",
+				{
+					"omitLastInOneLineBlock": false
+				}
+			],
+			"semi-spacing": [
+				2,
+				{
+					"before": false,
+					"after": true
+				}
+			],
+			"semi-style": [
+				2,
+				"last"
+			],
 			"comma-dangle": [
-				"error",
+				2,
 				"always-multiline"
-			]
+			],
+			"consistent-return": 0,
+			"no-extra-semi": 2,
+			"no-multi-spaces": 2,
+			"no-trailing-spaces": 2,
+			"unicorn/numeric-separators-style": 0,
+			"import/no-absolute-path": 0
 		}
 	}
 }

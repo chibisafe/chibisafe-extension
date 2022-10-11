@@ -1,12 +1,12 @@
 	{
-		"manifest_version": 2,
+		"manifest_version": 3,
 		"name": "chibisafe Uploader",
 		"description": "Uploader for chibisafe",
-		"version": "2021.1.4.0",
+		"version": "2022.10.10.0",
 		"version_name": "Holo",
+		"minimum_chrome_version": "93.0",
 		"options_ui": {
-			"page": "settings/settings.html",
-			"chrome_style": false,
+			"page": "pages/settings/settings.html",
 			"open_in_tab": true
 		},
 		"icons": {
@@ -17,16 +17,14 @@
 			"contextMenus",
 			"storage",
 			"notifications",
-			"webRequest",
-			"webRequestBlocking",
+			"scripting",
+			"declarativeNetRequest"
+		],
+		"host_permissions": [
 			"<all_urls>"
 		],
 		"background": {
-			"scripts": [
-				"js/browser-polyfill.min.js",
-				"js/axios.min.js",
-				"js/background.js"
-			],
-			"persistent": true
+			"service_worker": "js/background.js",
+			"type": "module"
 		}
 	}
