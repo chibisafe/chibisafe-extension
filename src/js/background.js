@@ -507,7 +507,7 @@ const Chibisafe = {
 		});
 
 		if (albumId) {
-			await browser.storage.local.set({ lastAlbum: albumId });
+			await Config.set({ lastAlbum: albumId });
 			browser.contextMenus.update('lastAlbum', {
 				title: `Upload to: ${albumName.replaceAll('&', '&&') }`,
 				enabled: true,
