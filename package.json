@@ -6,47 +6,35 @@
 	"author": "pilar6195 (https://github.com/pilar6195)",
 	"license": "MIT",
 	"engines": {
-		"node": "14.0.0"
+		"node": ">=14.0.0"
 	},
 	"scripts": {
-		"dev:edge": "web-ext run -s src -t chromium --chromium-binary \"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\" -u https://chibisafe.moe",
-		"dev:edgedev": "web-ext run -s src -t chromium --chromium-binary \"C:\\Program Files (x86)\\Microsoft\\Edge Dev\\Application\\msedge.exe\" -u https://chibisafe.moe"
+		"package:chrome": "npm run build:chrome && web-ext build -s .build --filename \"{name}-{version}-chrome.zip\"",
+		"package:firefox": "npm run build:firefox && web-ext build -s .build --filename \"{name}-{version}-firefox.zip\"",
+		"dev:chrome": "npm-watch build:chrome",
+		"dev:firefox": "npm-watch build:firefox",
+		"build:chrome": "npm run build:clean && npm run build:copy-chrome",
+		"build:firefox": "npm run build:clean && npm run build:copy-firefox",
+		"build:clean": "del-cli .build",
+		"build:copy-chrome": "cpy . !manifest.*.json ../.build/ --cwd src && cpy manifest.chrome.json ../.build --cwd src --rename manifest.json",
+		"build:copy-firefox": "cpy . !manifest.*.json !js/background.mv3.js ../.build/ --cwd src && cpy manifest.firefox.json ../.build --cwd src --rename manifest.json"
+	},
+	"watch": {
+		"build:chrome": {
+			"patterns": ["src"],
+			"extensions": "js,css,html,json"
+		},
+		"build:firefox": {
+			"patterns": ["src"],
+			"extensions": "js,css,html,json"
+		}
 	},
 	"devDependencies": {
+		"cpy-cli": "^4.2.0",
+		"del-cli": "^5.0.0",
 		"eslint": "^8.25.0",
 		"eslint-config-neon": "^0.1.37",
+		"npm-watch": "^0.11.0",
 		"web-ext": "^7.2.0"
-	},
-	"eslintConfig": {
-		"extends": [
-			"neon/common",
-			"neon/browser",
-			"neon/prettier"
-		],
-		"env": {
-			"browser": true,
-			"es6": true,
-			"webextensions": true
-		},
-		"ignorePatterns": [
-			"browser-polyfill.min.js"
-		],
-		"rules": {
-			"object-curly-spacing": 2,
-			"padded-blocks": 2,
-			"func-names": 0,
-			"id-length": 0,
-			"indent": [2, "tab", { "SwitchCase": 1 }],
-			"semi": [2, "always", {	"omitLastInOneLineBlock": false }],
-			"semi-spacing": [2, { "before": false, "after": true }],
-			"semi-style": [2, "last"],
-			"comma-dangle": [2, "always-multiline"],
-			"consistent-return": 0,
-			"no-extra-semi": 2,
-			"no-multi-spaces": 2,
-			"no-trailing-spaces": 2,
-			"unicorn/numeric-separators-style": 0,
-			"import/no-absolute-path": 0
-		}
 	}
 }

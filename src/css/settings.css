@@ -44,6 +44,16 @@ input[type="text"]:focus {
 	border-bottom: 1px solid #00d1b2
 }
 
+#tokenInvalidNotice {
+	display: none;
+	color: red;
+	margin-top: 3px;
+}
+
+#tokenInvalidNotice.show {
+	display: block;
+}
+
 button {
 	background: rgba(0, 0, 0, 0);
 	border: 1px solid #00d1b2;
@@ -58,6 +68,7 @@ button:hover {
 	background: #00d1b2;
 	color: white;
 }
+
 #autoCopyUrl {
 	vertical-align: sub;
 }

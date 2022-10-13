@@ -1,0 +1,30 @@
+{
+	"manifest_version": 2,
+	"name": "chibisafe Uploader",
+	"description": "Uploader for chibisafe",
+	"version": "2022.10.10.0",
+	"options_ui": {
+		"page": "settings.html",
+		"open_in_tab": true
+	},
+	"icons": {
+		"48": "images/logo-48x48.png",
+		"128": "images/logo-128x128.png"
+	},
+	"permissions": [
+		"contextMenus",
+		"storage",
+		"notifications",
+		"scripting",
+		"webRequest",
+		"webRequestBlocking",
+		"<all_urls>"
+	],
+	"background": {
+		"scripts": [
+			"libs/browser-polyfill.min.js",
+			"js/background.js"
+		],
+		"persistent": false
+	}
+}

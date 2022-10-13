@@ -1,5 +1,3 @@
-import '/libs/browser-polyfill.min.js';
-
 /* Helpers */
 
 const Helpers = {
@@ -67,7 +65,7 @@ const Helpers = {
 			await browser.tabs.sendMessage(tab.id, { action: 'checkIfLoaded' });
 			console.log('Content script was already loaded in tab:', tab.id);
 		} catch {
-			console.log('Loading content script is loaded in tab:', tab.id);
+			console.log('Loading content script in tab:', tab.id);
 			await browser.scripting.insertCSS({
 				files: ['/css/content.css'],
 				target: { tabId: tab.id },
@@ -79,10 +77,22 @@ const Helpers = {
 		}
 	},
 
-	// todo: need this figure out how to get this to work on MV3
 	async copyToClipboard(link, tab) {
-		await Helpers.loadContentScript(tab);
-		await browser.tabs.sendMessage(tab.id, { action: 'copyToClipboard', data: link });
+		await browser.scripting.executeScript({
+			target: { tabId: tab.id },
+			args: [link],
+			func: textToCopy => {
+				const input = document.createElement('textarea');
+				input.value = textToCopy;
+				input.setAttribute('readonly', '');
+				input.style.position = 'absolute';
+				input.style.left = '-9999px';
+				document.body.append(input);
+				input.select();
+				document.execCommand('copy');
+				input.remove();
+			},
+		});
 	},
 
 	get isFirefox() {
@@ -218,24 +228,31 @@ const Config = {
 			token: '',
 			lastAlbum: null,
 			autoCopyUrl: false,
+			albums: [],
 		});
 	},
 
-	async set(key, value) {
+	async set(keys) {
 		if (!this._data) {
 			await this.init();
 		}
 
-		await browser.storage.local.set(key, value);
-		this._data[key] = value;
+		await browser.storage.local.set(keys);
+		this._data = { ...this._data, ...keys };
 	},
 
-	async get(key) {
+	async get(keys) {
 		if (!this._data) {
 			await this.init();
 		}
 
-		return this._data[key];
+		if (Array.isArray(keys)) {
+			return Object.fromEntries(keys.map(key => {
+				return [key, this._data[key]];
+			}));
+		}
+
+		return this._data[keys];
 	},
 
 	async getAll() {
@@ -263,12 +280,18 @@ const Chibisafe = {
 			request.headers.append('token', config.token);
 		}
 
-		return fetch(request);
+		const req = await fetch(request);
+
+		if (!req.ok) {
+			throw req;
+		}
+
+		return req;
 	},
 
-	async getApiVersion() {
+	async getApiVersion(force = false) {
 		// We should not request this everytime we need it.
-		if (this.apiVersion) {
+		if (this.apiVersion && !force) {
 			return this.apiVersion;
 		}
 
@@ -282,13 +305,43 @@ const Chibisafe = {
 		return this.apiVersion;
 	},
 
-	async getAlbums() {
+	async validateApiToken() {
 		const config = await Config.getAll();
 		const apiVersion = await this.getApiVersion();
 
 		if (!config.domain && !config.token) {
+			return false;
+		}
+
+		try {
+			// The albums endpoint is the only/easiest way to validate if the token is valid.
+			const albumsEndpoint = Helpers.versionCompare(apiVersion, '4.0.0')
+				? '/api/albums/dropdown'
+				: '/api/albums';
+
+			await this.fetch(albumsEndpoint).then(res => res.json());
+			return true;
+		} catch {
+			return false;
+		}
+	},
+
+	async getAlbums(refresh = false) {
+		const config = await Config.getAll();
+
+		if (!refresh) {
+			return config.albums;
+		}
+
+		if (!config.domain && !config.token) {
+			await Config.set({
+				albums: [],
+			});
+
 			return [];
 		}
+
+		const apiVersion = await this.getApiVersion();
 
 		try {
 			const albumsEndpoint = Helpers.versionCompare(apiVersion, '4.0.0')
@@ -296,9 +349,19 @@ const Chibisafe = {
 				: '/api/albums';
 
 			const data = await this.fetch(albumsEndpoint).then(res => res.json());
+
+			await Config.set({
+				albums: data.albums,
+			});
+
 			return data.albums;
 		} catch (error) {
 			console.error('Failed to fetch Albums:', error);
+
+			await Config.set({
+				albums: [],
+			});
+
 			return [];
 		}
 	},
@@ -311,14 +374,25 @@ const Chibisafe = {
 		await browser.contextMenus.removeAll();
 		console.log('Removed old Context Menus');
 
-		if (!config.domain) return;
-
 		// Parent Context Menu
 		browser.contextMenus.create({
 			id: 'topContextMenu',
 			title: 'chibisafe',
 			contexts: ['all'],
 		});
+
+		// If there is no domain set in the config, then create
+		//  a context menu that will open the options page.
+		if (!config.domain) {
+			browser.contextMenus.create({
+				id: 'openOptionsPage',
+				title: 'Open Options Page to Configure',
+				parentId: 'topContextMenu',
+				contexts: ['all'],
+			});
+
+			return;
+		}
 
 		// Upload
 		browser.contextMenus.create({
@@ -345,7 +419,9 @@ const Chibisafe = {
 		});
 
 		if (config.token) {
-			const albums = await this.getAlbums();
+			const isValidToken = await this.validateApiToken();
+
+			if (!isValidToken) return;
 
 			/* Separator */
 			browser.contextMenus.create({
@@ -369,6 +445,8 @@ const Chibisafe = {
 				contexts,
 				type: 'separator',
 			});
+
+			const albums = await this.getAlbums(true);
 
 			if (!albums.length) {
 				return browser.contextMenus.create({
@@ -401,7 +479,7 @@ const Chibisafe = {
 
 			browser.contextMenus.create({
 				id: 'uploadToLabel',
-				title: 'Upload to:',
+				title: 'Upload to album:',
 				parentId: 'topContextMenu',
 				contexts,
 				type: 'normal',
@@ -518,10 +596,10 @@ const Chibisafe = {
 				});
 			}
 		} catch (error) {
-			console.error(error);
-
+			const data = await error.json();
+			console.error(error, data);
 			notification.update({
-				message: error.toString(),
+				message: `Error: ${data?.message || 'Unable to upload file.'}`,
 			});
 		} finally {
 			if (browser.declarativeNetRequest) {
@@ -583,10 +661,10 @@ const Chibisafe = {
 				});
 			}
 		} catch (error) {
-			console.error(error);
-
+			const data = await error.json();
+			console.error(error, data);
 			notification.update({
-				message: error.toString(),
+				message: `Error: ${data?.message || 'Unable to upload file.'}`,
 			});
 		}
 	},
@@ -614,7 +692,7 @@ const Chibisafe = {
 					body: {
 						id: fileToDelete.id,
 					},
-				});
+				}).then(res => res.json());
 
 				const notification = new Notification({
 					message: success
@@ -625,17 +703,21 @@ const Chibisafe = {
 				notification.clear(5e3);
 			}
 		} catch (error) {
-			console.error(error);
-
+			const data = await error.json();
+			console.error(error, data);
 			new Notification({
-				message: 'Error: Unable to delete the file.',
+				message: `Error: ${data?.message || 'Unable to delete the file.'}`,
 			});
 		}
 	},
 };
 
-browser.runtime.onInstalled.addListener(() => {
+browser.runtime.onInstalled.addListener(details => {
 	Chibisafe.createContextMenus();
+
+	if (details.reason === 'install') {
+		browser.runtime.openOptionsPage();
+	}
 });
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -645,6 +727,10 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 		case 'topContextMenu': {
 			browser.tabs.create({ url: config.domain + config.panelURL });
 			break;
+		}
+
+		case 'openOptionsPage': {
+			return browser.runtime.openOptionsPage();
 		}
 
 		case 'uploadFile': {
@@ -721,13 +807,21 @@ browser.runtime.onMessage.addListener(async (request, sender) => {
 			break;
 		}
 
-		case 'refreshConfig': {
-			Config.init();
+		case 'validateApiToken': {
+			return Chibisafe.validateApiToken();
+		}
+
+		case 'saveConfig': {
+			await Config.set(data);
+			// In the case the service worker was alive, we need to
+			// update the stored API version in the case the user
+			// changed the instance domain.
+			await Chibisafe.getApiVersion(true);
 			break;
 		}
 
-		case 'refreshAlbumList': {
-			Chibisafe.createContextMenus();
+		case 'refreshContextMenu': {
+			await Chibisafe.createContextMenus();
 			break;
 		}
 
@@ -738,7 +832,6 @@ browser.runtime.onMessage.addListener(async (request, sender) => {
 
 		case 'clearNotification': {
 			const notification = ActiveNotifications.get(data.notificationId);
-			console.log(notification);
 			notification.clear(data.timeout);
 			break;
 		}

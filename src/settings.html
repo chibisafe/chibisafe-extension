@@ -3,9 +3,9 @@
 	<head>
 		<title>chibisafe Settings</title>
 		<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
-		<link href="/pages/settings/settings.css" rel="stylesheet">
+		<link href="/css/settings.css" rel="stylesheet">
 		<script src="/libs/browser-polyfill.min.js"></script>
-		<script src="/pages/settings/settings.js"></script>
+		<script src="/js/settings.js"></script>
 	</head>
 	<body>
 		<div class="container">
@@ -25,6 +25,10 @@
 
 			<p>Your chibisafe token (optional):</p>
 			<input type="text" id="token" placeholder="your-super-secret-token">
+			<div id="tokenInvalidNotice">
+				Chibisafe token is invalid. Fix or remove the token otherwise the
+				extension may not function properly!
+			</div>
 
 			<p>
 				<label>Automatically copy URL to clipboard after upload <input type="checkbox" id="autoCopyUrl"></label>

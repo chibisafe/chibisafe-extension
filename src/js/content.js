@@ -119,29 +119,6 @@ browser.runtime.onMessage.addListener(request => {
 			return Promise.resolve(true);
 		}
 
-		case 'copyToClipboard': {
-			// navigator.clipboard.writeText(data);
-
-			const input = document.createElement('textarea');
-			input.value = data;
-			input.setAttribute('readonly', '');
-			input.style.position = 'absolute';
-			input.style.left = '-9999px';
-			document.body.append(input);
-			input.select();
-			document.execCommand('copy');
-			input.remove();
-
-			/* const input = document.createElement('textarea');
-			input.value = data;
-			input.focus();
-			input.select();
-			document.execCommand('copy');
-			input.remove(); */
-
-			break;
-		}
-
 		default: {
 			return false;
 		}

@@ -1,5 +1,7 @@
 /* eslint no-alert: 0  */
 
+const $ = el => document.querySelector(el);
+
 document.addEventListener('DOMContentLoaded', async () => {
 	// Get storage
 	const storage = await browser.storage.local.get({
@@ -10,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	// Set values
 	for (const [key, value] of Object.entries(storage)) {
-		const el = document.querySelector(`#${key}`);
+		const el = $(`#${key}`);
 
 		if (el) {
 			if (el.type === 'checkbox') {
@@ -22,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}
 
 	// Validate url
-	document.querySelector('#domain').addEventListener('blur', function() {
+	$('#domain').addEventListener('blur', function() {
 		if (!this.value) return;
 
 		try {
@@ -34,28 +36,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 	});
 
 	// Save settings
-	document.querySelector('#save').addEventListener('click', async () => {
-		const domain = document.querySelector('#domain').value;
-		const token = document.querySelector('#token').value;
-		const autoCopyUrl = document.querySelector('#autoCopyUrl').checked;
+	$('#save').addEventListener('click', async () => {
+		const domain = $('#domain').value;
+		const token = $('#token').value;
+		const autoCopyUrl = $('#autoCopyUrl').checked;
 
 		if (!domain) {
 			return alert('chibisafe domain is required!');
 		}
 
 		try {
-			await browser.storage.local.set({ domain, token, autoCopyUrl });
-
-			/*
-			 * Refresh the storage cache in the service worker. If the service
-			 * worker is inactive then this is pointless. However, this is
-			 * needed just in case the service worker is active and has already
-			 * cached the extension storage.
-			 */
-			await browser.runtime.sendMessage({ action: 'refreshConfig' });
+			await browser.runtime.sendMessage({
+				action: 'saveConfig',
+				data: { domain, token, autoCopyUrl },
+			});
 
 			if (token) {
-				browser.runtime.sendMessage({ action: 'refreshAlbumList' });
+				const isValidToken = await browser.runtime.sendMessage({ action: 'validateApiToken' });
+				$('#tokenInvalidNotice').classList[isValidToken ? 'remove': 'add']('show');
 			}
 
 			const notificationId = await browser.runtime.sendMessage({
@@ -64,6 +62,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 					message: 'Settings Saved!',
 				},
 			});
+
+			await browser.runtime.sendMessage({ action: 'refreshContextMenu' });
 
 			browser.runtime.sendMessage({
 				action: 'clearNotification',
