@@ -766,8 +766,8 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 		default: {
 			if (info.menuItemId.startsWith('albumId-')) {
 				const albums = await Chibisafe.getAlbums();
-				const match = info.menuItemId.match(/albumId-(?<albumId>\d+)/);
-				const album = albums.find(a => a.id === Number.parseInt(match.groups.albumId, 10));
+				const albumId = info.menuItemId.split('-')[1];
+				const album = albums.find(a => a.id === Number.parseInt(albumId, 10));
 				Chibisafe.uploadFile(info.srcUrl, info.pageUrl, tab, album.id, album.name);
 			}
 		}
