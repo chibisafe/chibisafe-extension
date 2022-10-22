@@ -759,7 +759,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 		case 'lastAlbum': {
 			const albums = await Chibisafe.getAlbums();
 			const lastAlbum = albums.find(a => a.id === config.lastAlbum);
-			Chibisafe.uploadFile(info.srcUrl, info.pageUrl, tab, lastAlbum.id, lastAlbum.name);
+			Chibisafe.uploadFile(info.srcUrl, info.pageUrl, tab, lastAlbum);
 			break;
 		}
 
