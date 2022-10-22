@@ -488,7 +488,7 @@ const Chibisafe = {
 
 			for (const album of albums) {
 				browser.contextMenus.create({
-					id: `albumId-${album.id}`,
+					id: `albumId-${album.id || album.uuid}`,
 					title: album.name.replaceAll('&', '&&'),
 					parentId: 'topContextMenu',
 					contexts,
@@ -497,7 +497,7 @@ const Chibisafe = {
 		}
 	},
 
-	async uploadFile(url, pageURL, tab, albumId, albumName) {
+	async uploadFile(url, pageURL, tab, album) {
 		const config = await Config.getAll();
 		const apiVersion = await this.getApiVersion();
 
@@ -506,10 +506,10 @@ const Chibisafe = {
 			requireInteraction: true,
 		});
 
-		if (albumId) {
-			await Config.set({ lastAlbum: albumId });
+		if (album) {
+			await Config.set({ lastAlbum: album.id || album.uuid });
 			browser.contextMenus.update('lastAlbum', {
-				title: `Upload to: ${albumName.replaceAll('&', '&&') }`,
+				title: `Upload to: ${album.name.replaceAll('&', '&&') }`,
 				enabled: true,
 			});
 		}
@@ -552,11 +552,13 @@ const Chibisafe = {
 				headers: {},
 			};
 
-			if (albumId && config.token) {
-				if (Helpers.versionCompare(apiVersion, '4.0.0')) {
-					options.headers.albumid = albumId;
+			if (album && config.token) {
+				if (Helpers.versionCompare(apiVersion, '5.0.0')) {
+					options.headers.albumuuid = album.uuid;
+				} else if (Helpers.versionCompare(apiVersion, '4.0.0')) {
+					options.headers.albumid = album.id;
 				} else {
-					options.url = `${options.url}/${albumId}`;
+					options.url = `${options.url}/${album.id}`;
 				}
 			}
 
@@ -766,9 +768,11 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 		default: {
 			if (info.menuItemId.startsWith('albumId-')) {
 				const albums = await Chibisafe.getAlbums();
-				const albumId = info.menuItemId.split('-')[1];
-				const album = albums.find(a => a.id === Number.parseInt(albumId, 10));
-				Chibisafe.uploadFile(info.srcUrl, info.pageUrl, tab, album.id, album.name);
+				const albumId = info.menuItemId.split('-').slice(1).join('-');
+				const album = albums.find(a => a.uuid
+					? a.uuid === albumId
+					: a.id === Number.parseInt(albumId, 10));
+				Chibisafe.uploadFile(info.srcUrl, info.pageUrl, tab, album);
 			}
 		}
 	}
