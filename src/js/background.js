@@ -5,6 +5,7 @@ const Helpers = {
 		return {
 			'image/png': '.png',
 			'image/jpeg': '.jpg',
+			'image/webp': '.webp',
 			'image/gif': '.gif',
 			'image/bmp': '.bmp',
 			'image/x-icon': '.ico',
