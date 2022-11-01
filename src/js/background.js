@@ -599,7 +599,7 @@ const Chibisafe = {
 				});
 			}
 		} catch (error) {
-			const data = await error.json();
+			const data = await error.json?.() ?? error;
 			console.error(error, data);
 			notification.update({
 				message: `Error: ${data?.message || 'Unable to upload file.'}`,
@@ -664,7 +664,7 @@ const Chibisafe = {
 				});
 			}
 		} catch (error) {
-			const data = await error.json();
+			const data = await error.json?.() ?? error;
 			console.error(error, data);
 			notification.update({
 				message: `Error: ${data?.message || 'Unable to upload file.'}`,
@@ -706,7 +706,7 @@ const Chibisafe = {
 				notification.clear(5e3);
 			}
 		} catch (error) {
-			const data = await error.json();
+			const data = await error.json?.() ?? error;
 			console.error(error, data);
 			new Notification({
 				message: `Error: ${data?.message || 'Unable to delete the file.'}`,
