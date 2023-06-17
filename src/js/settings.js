@@ -51,6 +51,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 				data: { domain, token, autoCopyUrl },
 			});
 
+			const supported = await browser.runtime.sendMessage({
+				action: 'checkIfSupportedInstance',
+			});
+
+			if (supported) {
+				$('#outdatedChibisafeNotice').classList.remove('show');
+			} else {
+				$('#outdatedChibisafeNotice').classList.add('show');
+			}
+
 			if (token) {
 				const isValidToken = await browser.runtime.sendMessage({ action: 'validateApiToken' });
 				$('#tokenInvalidNotice').classList[isValidToken ? 'remove': 'add']('show');

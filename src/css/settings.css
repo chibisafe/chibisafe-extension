@@ -42,13 +42,15 @@ input[type="text"]:focus {
 	border-bottom: 1px solid #00d1b2
 }
 
-#tokenInvalidNotice {
+#tokenInvalidNotice,
+#outdatedChibisafeNotice {
 	display: none;
 	color: red;
 	margin-top: 3px;
 }
 
-#tokenInvalidNotice.show {
+#tokenInvalidNotice.show,
+#outdatedChibisafeNotice.show {
 	display: block;
 }
 

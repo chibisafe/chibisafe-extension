@@ -225,7 +225,7 @@ const Config = {
 	async init() {
 		this._data = await browser.storage.local.get({
 			domain: '',
-			panelURL: '/dashboard',
+			panelURL: '/dashboard/uploads',
 			token: '',
 			lastAlbum: null,
 			autoCopyUrl: false,
@@ -275,10 +275,8 @@ const Chibisafe = {
 
 		const request = new Request(new URL(path, config.domain), options);
 
-		request.headers.set('Accept', 'application/vnd.chibisafe.json, application/vnd.lolisafe.json');
-
 		if (config.token) {
-			request.headers.append('token', config.token);
+			request.headers.append('x-api-key', config.token);
 		}
 
 		const req = await fetch(request);
@@ -308,7 +306,6 @@ const Chibisafe = {
 
 	async validateApiToken() {
 		const config = await Config.getAll();
-		const apiVersion = await this.getApiVersion();
 
 		if (!config.domain && !config.token) {
 			return false;
@@ -316,11 +313,7 @@ const Chibisafe = {
 
 		try {
 			// The albums endpoint is the only/easiest way to validate if the token is valid.
-			const albumsEndpoint = Helpers.versionCompare(apiVersion, '4.0.0')
-				? '/api/albums/dropdown'
-				: '/api/albums';
-
-			await this.fetch(albumsEndpoint).then(res => res.json());
+			await this.fetch('/api/albums').then(res => res.json());
 			return true;
 		} catch {
 			return false;
@@ -342,14 +335,8 @@ const Chibisafe = {
 			return [];
 		}
 
-		const apiVersion = await this.getApiVersion();
-
 		try {
-			const albumsEndpoint = Helpers.versionCompare(apiVersion, '4.0.0')
-				? '/api/albums/dropdown'
-				: '/api/albums';
-
-			const data = await this.fetch(albumsEndpoint).then(res => res.json());
+			const data = await this.fetch('/api/albums').then(res => res.json());
 
 			await Config.set({
 				albums: data.albums,
@@ -460,7 +447,7 @@ const Chibisafe = {
 				});
 			}
 
-			const lastAlbum = albums.find(a => a.id === config.lastAlbum);
+			const lastAlbum = albums.find(a => a.uuid === config.lastAlbum);
 
 			browser.contextMenus.create({
 				id: 'lastAlbum',
@@ -489,7 +476,7 @@ const Chibisafe = {
 
 			for (const album of albums) {
 				browser.contextMenus.create({
-					id: `albumId-${album.id || album.uuid}`,
+					id: `albumId-${album.uuid}`,
 					title: album.name.replaceAll('&', '&&'),
 					parentId: 'topContextMenu',
 					contexts,
@@ -500,7 +487,6 @@ const Chibisafe = {
 
 	async uploadFile(url, pageURL, tab, album) {
 		const config = await Config.getAll();
-		const apiVersion = await this.getApiVersion();
 
 		const notification = new Notification({
 			message: 'Uploading...',
@@ -508,7 +494,7 @@ const Chibisafe = {
 		});
 
 		if (album) {
-			await Config.set({ lastAlbum: album.id || album.uuid });
+			await Config.set({ lastAlbum: album.uuid });
 			browser.contextMenus.update('lastAlbum', {
 				title: `Upload to: ${album.name.replaceAll('&', '&&') }`,
 				enabled: true,
@@ -545,7 +531,7 @@ const Chibisafe = {
 			refererHeader = null;
 
 			const formData = new FormData();
-			formData.append('files[]', image, `upload${Helpers.fileExt(image.type)}`);
+			formData.append('file[]', image, `upload${Helpers.fileExt(image.type)}`);
 
 			const options = {
 				method: 'POST',
@@ -554,50 +540,34 @@ const Chibisafe = {
 			};
 
 			if (album && config.token) {
-				if (Helpers.versionCompare(apiVersion, '5.0.0')) {
-					options.headers.albumuuid = album.uuid;
-				} else if (Helpers.versionCompare(apiVersion, '4.0.0')) {
-					options.headers.albumid = album.id;
-				} else {
-					options.url = `${options.url}/${album.id}`;
-				}
+				options.headers.albumuuid = album.uuid;
 			}
 
-			const data = await this.fetch('/api/upload', options).then(res => res.json());
+			const fileData = await this.fetch('/api/upload', options).then(res => res.json());
 
-			const file = Helpers.versionCompare(apiVersion, '4.0.0') ? data : data.files[0];
+			const buttons = [{
+				title: 'Delete Upload',
+				callback: () => this.deleteFile(fileData),
+			}];
 
-			if (file) {
-				const buttons = [{
-					title: 'Delete Upload',
-					callback: () => this.deleteFile(file),
-				}];
-
-				if (!config.autoCopyUrl) {
-					buttons.unshift({
-						title: 'Copy to Clipboard',
-						callback: () => Helpers.copyToClipboard(file.url, tab),
-					});
-				}
-
-				notification.update({
-					message: 'Upload Complete!',
-					contextMessage: file.url,
-					buttons,
-				});
-
-				if (config.autoCopyUrl) {
-					Helpers.copyToClipboard(file.url, tab);
-				}
-
-				notification.clear(5e3);
-			} else {
-				/* This should only ever fire on instances lower than 4.0 */
-				notification.update({
-					message: data.description || data.message,
-					contextMessage: url,
+			if (!config.autoCopyUrl) {
+				buttons.unshift({
+					title: 'Copy to Clipboard',
+					callback: () => Helpers.copyToClipboard(fileData.url, tab),
 				});
 			}
+
+			notification.update({
+				message: 'Upload Complete!',
+				contextMessage: fileData.url,
+				buttons,
+			});
+
+			if (config.autoCopyUrl) {
+				Helpers.copyToClipboard(fileData.url, tab);
+			}
+
+			notification.clear(5e3);
 		} catch (error) {
 			const data = await error.json?.() ?? error;
 			console.error(error, data);
@@ -615,7 +585,6 @@ const Chibisafe = {
 
 	async uploadScreenshot(blob, tab) {
 		const config = await Config.getAll();
-		const apiVersion = await this.getApiVersion();
 
 		const notification = new Notification({
 			message: 'Uploading...',
@@ -623,46 +592,37 @@ const Chibisafe = {
 		});
 
 		const formData = new FormData();
-		formData.append('files[]', blob, 'upload.png');
+		formData.append('file[]', blob, 'upload.png');
 
 		try {
-			const data = await this.fetch('/api/upload', {
+			const fileData = await this.fetch('/api/upload', {
 				method: 'POST',
 				body: formData,
 			}).then(res => res.json());
 
-			const file = Helpers.versionCompare(apiVersion, '4.0.0') ? data : data.files[0];
+			const buttons = [{
+				title: 'Delete Upload',
+				callback: () => this.deleteFile(fileData),
+			}];
 
-			if (file) {
-				const buttons = [{
-					title: 'Delete Upload',
-					callback: () => this.deleteFile(file),
-				}];
-
-				if (!config.autoCopyUrl) {
-					buttons.unshift({
-						title: 'Copy to Clipboard',
-						callback: () => Helpers.copyToClipboard(file.url, tab),
-					});
-				}
-
-				notification.update({
-					message: 'Upload Complete!',
-					contextMessage: file.url,
-					buttons,
-				});
-
-				if (config.autoCopyUrl) {
-					Helpers.copyToClipboard(file.url, tab);
-				}
-
-				notification.clear(5e3);
-			} else {
-				/* This should only ever fire on instances lower than 4.0 */
-				notification.update({
-					message: data.description || data.message,
+			if (!config.autoCopyUrl) {
+				buttons.unshift({
+					title: 'Copy to Clipboard',
+					callback: () => Helpers.copyToClipboard(fileData.url, tab),
 				});
 			}
+
+			notification.update({
+				message: 'Upload Complete!',
+				contextMessage: fileData.url,
+				buttons,
+			});
+
+			if (config.autoCopyUrl) {
+				Helpers.copyToClipboard(fileData.url, tab);
+			}
+
+			notification.clear(5e3);
 		} catch (error) {
 			const data = await error.json?.() ?? error;
 			console.error(error, data);
@@ -673,38 +633,16 @@ const Chibisafe = {
 	},
 
 	async deleteFile(file) {
-		const apiVersion = await this.getApiVersion();
-
 		try {
-			if (Helpers.versionCompare(apiVersion, '4.0.0')) {
-				await this.fetch(file.deleteUrl, {
-					method: 'DELETE',
-				});
+			await this.fetch(`/api/file/${file.uuid}`, {
+				method: 'DELETE',
+			});
 
-				const notification = new Notification({
-					message: `File ${file.name} was deleted!`,
-				});
+			const notification = new Notification({
+				message: `File ${file.name} was deleted!`,
+			});
 
-				notification.clear(5e3);
-			} else {
-				const { files } = await this.fetch('/api/uploads/0').then(res => res.json());
-				const fileToDelete = files.find(a => a.name === file.name);
-
-				const { success } = await this.fetch('/api/uploads/delete', {
-					method: 'POST',
-					body: {
-						id: fileToDelete.id,
-					},
-				}).then(res => res.json());
-
-				const notification = new Notification({
-					message: success
-						? `File ${file.name} was deleted!`
-						: 'Error: Unable to delete the file.',
-				});
-
-				notification.clear(5e3);
-			}
+			notification.clear(5e3);
 		} catch (error) {
 			const data = await error.json?.() ?? error;
 			console.error(error, data);
@@ -761,7 +699,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 
 		case 'lastAlbum': {
 			const albums = await Chibisafe.getAlbums();
-			const lastAlbum = albums.find(a => a.id === config.lastAlbum);
+			const lastAlbum = albums.find(a => a.uuid === config.lastAlbum);
 			Chibisafe.uploadFile(info.srcUrl, info.pageUrl, tab, lastAlbum);
 			break;
 		}
@@ -770,9 +708,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 			if (info.menuItemId.startsWith('albumId-')) {
 				const albums = await Chibisafe.getAlbums();
 				const albumId = info.menuItemId.split('-').slice(1).join('-');
-				const album = albums.find(a => a.uuid
-					? a.uuid === albumId
-					: a.id === Number.parseInt(albumId, 10));
+				const album = albums.find(a => a.uuid === albumId);
 				Chibisafe.uploadFile(info.srcUrl, info.pageUrl, tab, album);
 			}
 		}
@@ -814,6 +750,16 @@ browser.runtime.onMessage.addListener(async (request, sender) => {
 
 		case 'validateApiToken': {
 			return Chibisafe.validateApiToken();
+		}
+
+		case 'getApiVersion': {
+			return Chibisafe.getApiVersion();
+		}
+
+		// Might readd v4 support again in the future but for now it is what it is.
+		case 'checkIfSupportedInstance': {
+			const apiVersion = await Chibisafe.getApiVersion();
+			return Helpers.versionCompare(apiVersion, '5.0.0');
 		}
 
 		case 'saveConfig': {
