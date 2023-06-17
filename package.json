@@ -32,9 +32,9 @@
 	"devDependencies": {
 		"cpy-cli": "^4.2.0",
 		"del-cli": "^5.0.0",
-		"eslint": "^8.25.0",
-		"eslint-config-neon": "^0.1.37",
+		"eslint": "^8.42.0",
+		"eslint-config-neon": "^0.1.47",
 		"npm-watch": "^0.11.0",
-		"web-ext": "^7.2.0"
+		"web-ext": "^7.6.2"
 	}
 }
