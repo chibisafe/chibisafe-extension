@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "chibisafe Uploader",
 	"description": "Uploader for chibisafe",
-	"version": "2022.10.10.0",
+	"version": "2.0",
 	"options_ui": {
 		"page": "settings.html",
 		"open_in_tab": true

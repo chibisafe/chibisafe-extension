@@ -2,7 +2,7 @@
 	"manifest_version": 3,
 	"name": "chibisafe Uploader",
 	"description": "Uploader for chibisafe",
-	"version": "2022.10.10.0",
+	"version": "2.0",
 	"version_name": "Holo",
 	"minimum_chrome_version": "93.0",
 	"options_ui": {
