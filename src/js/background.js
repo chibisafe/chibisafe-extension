@@ -6,6 +6,7 @@ const Helpers = {
 			'image/png': '.png',
 			'image/jpeg': '.jpg',
 			'image/webp': '.webp',
+			'image/svg+xml': '.svg',
 			'image/gif': '.gif',
 			'image/bmp': '.bmp',
 			'image/x-icon': '.ico',
