@@ -1,7 +1,7 @@
 #chibisafe-lasso {
 	position: fixed;
 	border: 1px dotted;
-	background: rgba(255, 255, 255, 0.1);
+	background: rgba(0, 0, 0, 0.25);
 	display: none;
 	left: 0;
 	right: 0;

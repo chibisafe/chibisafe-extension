@@ -19,7 +19,8 @@ let secondPos;
 
 const captureFunctions = {
 	mousedown: event => {
-		if (event.buttons !== 1) return;
+		event.preventDefault();
+		if (event.button !== 0) return;
 
 		setStyles('#chibisafe-lasso', {
 			display: 'block',
@@ -30,6 +31,7 @@ const captureFunctions = {
 		firstPos = { x: event.clientX, y: event.clientY };
 	},
 	mousemove: event => {
+		event.preventDefault();
 		if (event.buttons !== 1) return;
 
 		const originalTop = $('#chibisafe-lasso').style.top;
@@ -54,7 +56,8 @@ const captureFunctions = {
 		});
 	},
 	mouseup: event => {
-		if (event.which !== 1) return;
+		event.preventDefault();
+		if (event.button !== 0 && event.button !== 2) return;
 
 		document.body.classList.remove('chibisafe-filter');
 
@@ -85,6 +88,10 @@ const captureFunctions = {
 		document.removeEventListener('mouseup', captureFunctions.mouseup);
 
 		setTimeout(() => {
+			document.removeEventListener('contextmenu', captureFunctions.contextmenu);
+
+			if (event.button !== 0) return;
+
 			browser.runtime.sendMessage({
 				action: 'screenshotCoordinates',
 				data: {
@@ -92,7 +99,10 @@ const captureFunctions = {
 					end: secondPos,
 				},
 			});
-		}, 100);
+		});
+	},
+	contextmenu: event => {
+		event.preventDefault();
 	},
 };
 
@@ -111,6 +121,7 @@ browser.runtime.onMessage.addListener(request => {
 			document.addEventListener('mousedown', captureFunctions.mousedown);
 			document.addEventListener('mousemove', captureFunctions.mousemove);
 			document.addEventListener('mouseup', captureFunctions.mouseup);
+			document.addEventListener('contextmenu', captureFunctions.contextmenu);
 
 			break;
 		}
