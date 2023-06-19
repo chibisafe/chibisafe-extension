@@ -477,7 +477,7 @@ const Chibisafe = {
 
 			for (const album of albums) {
 				browser.contextMenus.create({
-					id: `albumId-${album.uuid}`,
+					id: `albumId:${album.uuid}`,
 					title: album.name.replaceAll('&', '&&'),
 					parentId: 'topContextMenu',
 					contexts,
@@ -706,9 +706,9 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 		}
 
 		default: {
-			if (info.menuItemId.startsWith('albumId-')) {
+			if (info.menuItemId.startsWith('albumId:')) {
 				const albums = await Chibisafe.getAlbums();
-				const albumId = info.menuItemId.split('-').slice(1).join('-');
+				const albumId = info.menuItemId.split(':')[1];
 				const album = albums.find(a => a.uuid === albumId);
 				Chibisafe.uploadFile(info.srcUrl, info.pageUrl, tab, album);
 			}
