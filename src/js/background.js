@@ -390,6 +390,13 @@ const Chibisafe = {
 			contexts,
 		});
 
+		/* browser.contextMenus.create({
+			id: 'shortenUrl',
+			title: 'Shorten Current URL',
+			parentId: 'topContextMenu',
+			contexts: ['all'],
+		}); */
+
 		// Screenshot Page
 		browser.contextMenus.create({
 			id: 'uploadScreenshot',
@@ -672,6 +679,11 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 
 		case 'openOptionsPage': {
 			return browser.runtime.openOptionsPage();
+		}
+
+		case 'shortenUrl': {
+			// wip: needs to be implemented into chibisafe first
+			return;
 		}
 
 		case 'uploadFile': {
