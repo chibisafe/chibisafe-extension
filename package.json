@@ -18,8 +18,8 @@
 		"build:chrome": "npm run build:clean && npm run build:copy-chrome",
 		"build:firefox": "npm run build:clean && npm run build:copy-firefox",
 		"build:clean": "del-cli .build/*",
-		"build:copy-chrome": "cpy . !manifest.*.json ../.build/ --cwd src && cpy manifest.chrome.json ../.build --cwd src --rename manifest.json",
-		"build:copy-firefox": "cpy . !manifest.*.json !js/background.mv3.js ../.build/ --cwd src && cpy manifest.firefox.json ../.build --cwd src --rename manifest.json"
+		"build:copy-chrome": "cpy src/**/* !src/manifest.*.json .build && cpy src/manifest.chrome.json .build --rename=manifest.json --flat",
+		"build:copy-firefox": "cpy src/**/* !src/manifest.*.json  !src/js/background.mv3.js .build && cpy src/manifest.firefox.json .build --rename=manifest.json --flat"
 	},
 	"watch": {
 		"build:chrome": {
@@ -32,11 +32,11 @@
 		}
 	},
 	"devDependencies": {
-		"cpy-cli": "^4.2.0",
-		"del-cli": "^5.0.0",
-		"eslint": "^8.42.0",
+		"cpy-cli": "^5.0.0",
+		"del-cli": "^5.1.0",
+		"eslint": "^8.48.0",
 		"eslint-config-neon": "^0.1.47",
 		"npm-watch": "^0.11.0",
-		"web-ext": "^7.6.2"
+		"web-ext": "^7.7.0"
 	}
 }
