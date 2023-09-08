@@ -13,7 +13,7 @@
 		"dev:firefox": "web-ext run -s .build --target=firefox-desktop --devtools --start-url=https://chibisafe.moe",
 		"watch:chrome": "npm-watch build:chrome",
 		"watch:firefox": "npm-watch build:firefox",
-		"package:chrome": "npm run build:chrome && web-ext build -s .build --filename \"{name}-{version}-chrome.zip\"",
+		"package:chrome": "npm run build:chrome && web-ext build -s .build --filename \"{name}-{version_name}-chrome.zip\"",
 		"package:firefox": "npm run build:firefox && web-ext build -s .build --filename \"{name}-{version}-firefox.zip\"",
 		"build:chrome": "npm run build:clean && npm run build:copy-chrome",
 		"build:firefox": "npm run build:clean && npm run build:copy-firefox",
