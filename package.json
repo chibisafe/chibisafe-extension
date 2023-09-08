@@ -9,13 +9,15 @@
 		"node": ">=14.0.0"
 	},
 	"scripts": {
+		"dev:chrome": "web-ext run -s .build --target=chromium --devtools --start-url=https://chibisafe.moe",
+		"dev:firefox": "web-ext run -s .build --target=firefox-desktop --devtools --start-url=https://chibisafe.moe",
+		"watch:chrome": "npm-watch build:chrome",
+		"watch:firefox": "npm-watch build:firefox",
 		"package:chrome": "npm run build:chrome && web-ext build -s .build --filename \"{name}-{version}-chrome.zip\"",
 		"package:firefox": "npm run build:firefox && web-ext build -s .build --filename \"{name}-{version}-firefox.zip\"",
-		"dev:chrome": "npm-watch build:chrome",
-		"dev:firefox": "npm-watch build:firefox",
 		"build:chrome": "npm run build:clean && npm run build:copy-chrome",
 		"build:firefox": "npm run build:clean && npm run build:copy-firefox",
-		"build:clean": "del-cli .build",
+		"build:clean": "del-cli .build/*",
 		"build:copy-chrome": "cpy . !manifest.*.json ../.build/ --cwd src && cpy manifest.chrome.json ../.build --cwd src --rename manifest.json",
 		"build:copy-firefox": "cpy . !manifest.*.json !js/background.mv3.js ../.build/ --cwd src && cpy manifest.firefox.json ../.build --cwd src --rename manifest.json"
 	},
