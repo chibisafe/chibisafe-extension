@@ -1,33 +1,30 @@
 * {
 	font-family: 'Source Sans Pro', sans-serif;
-	color: #3c3c3c;
+	color: #e8e6e3;
 }
 
-p#b {
-	border-radius: 24px;
-	display: inline-block;
-	height: 240px;
-	margin-bottom: 40px;
-	position: relative;
-	vertical-align: top;
-	width: 240px;
-	box-shadow: 0 20px 60px rgba(10, 10, 10, 0.05), 0 5px 10px rgba(10, 10, 10, 0.1), 0 1px 1px rgba(10, 10, 10, 0.2);
+html {
+	height: 100vh;
+	background: #1e2122;
 }
 
-p#b img.logo {
-	height: 200px;
-	margin-top: 20px;
+body {
+	font-size: 100%;
 }
 
-div.container {
+.container {
 	text-align: center;
 	width: 870px;
 	margin: 0 auto;
 }
 
-h2 {
-	text-decoration: underline;
-	text-align: center;
+.logo {
+	height: 200px;
+	margin-top: 20px;
+}
+
+#description {
+	margin-bottom: 3rem;
 }
 
 input[type="text"] {
@@ -38,26 +35,41 @@ input[type="text"] {
 	padding: 10px;
 	outline: none;
 	text-align: center;
+	color: #1a202c;
 }
 
 input[type="text"]:focus {
 	border-bottom: 1px solid #00d1b2
 }
 
+#tokenInvalidNotice,
+#outdatedChibisafeNotice {
+	display: none;
+	color: red;
+	margin-top: 3px;
+}
+
+#tokenInvalidNotice.show,
+#outdatedChibisafeNotice.show {
+	display: block;
+}
+
 button {
 	background: rgba(0, 0, 0, 0);
-	border: 1px solid #00d1b2;
+	border: 1px solid #60a5fa;
 	width: 200px;
 	height: 40px;
 	font-size: 14px;
 	border-radius: 5px;
 	margin-top: 20px;
+	cursor: pointer;
 }
 
 button:hover {
-	background: #00d1b2;
+	background: #60a5fa;
 	color: white;
 }
+
 #autoCopyUrl {
 	vertical-align: sub;
 }

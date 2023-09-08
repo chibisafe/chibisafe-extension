@@ -3,17 +3,17 @@
 	<head>
 		<title>chibisafe Settings</title>
 		<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
-		<link href="/settings/settings.css" rel="stylesheet">
-		<script src="/js/browser-polyfill.min.js"></script>
-		<script src="/settings/settings.js"></script>
+		<link href="/css/settings.css" rel="stylesheet">
+		<script src="/libs/browser-polyfill.min.js"></script>
+		<script src="/js/settings.js"></script>
 	</head>
 	<body>
 		<div class="container">
-			<p id="b">
+			<p>
 				<img class="logo" src="/images/logo.png">
 			</p>
 
-			<p>
+			<p id="description">
 				This page will help you setup your chibisafe extension so you can rehost images/audio/videos by right clicking on them.
 				For this to work you need to provide the domain were chibisafe is running. If you want to keep track of your uploads and
 				be able to create albums to store them, you should create an account on the website and paste the token here, so that every
@@ -22,9 +22,16 @@
 
 			<p>Domain on which chibisafe is running:</p>
 			<input type="text" id="domain" placeholder="https://chibisafe.moe">
+			<div id="outdatedChibisafeNotice">
+				This extension only supports chibisafe v5 instances.
+			</div>
 
 			<p>Your chibisafe token (optional):</p>
 			<input type="text" id="token" placeholder="your-super-secret-token">
+			<div id="tokenInvalidNotice">
+				Chibisafe token is invalid. Fix or remove the token otherwise the
+				extension may not function properly!
+			</div>
 
 			<p>
 				<label>Automatically copy URL to clipboard after upload <input type="checkbox" id="autoCopyUrl"></label>

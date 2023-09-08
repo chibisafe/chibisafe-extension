@@ -4,21 +4,23 @@ const $ = el => document.querySelector(el);
 
 function setStyles(element, styles) {
 	const el = document.querySelector(element);
-	for (const style in styles) { // eslint-disable-line
-		el.style[style] = styles[style];
+	for (const [key, style] of Object.entries(styles)) {
+		el.style[key] = style;
 	}
 }
 
+// Create laso element to be used when selecting the portion of the page to screenshot.
 const chibiLasso = document.createElement('div');
 chibiLasso.setAttribute('id', 'chibisafe-lasso');
-document.body.appendChild(chibiLasso);
+document.body.append(chibiLasso);
 
 let firstPos;
 let secondPos;
 
 const captureFunctions = {
 	mousedown: event => {
-		if (event.buttons !== 1) return;
+		event.preventDefault();
+		if (event.button !== 0) return;
 
 		setStyles('#chibisafe-lasso', {
 			display: 'block',
@@ -29,6 +31,7 @@ const captureFunctions = {
 		firstPos = { x: event.clientX, y: event.clientY };
 	},
 	mousemove: event => {
+		event.preventDefault();
 		if (event.buttons !== 1) return;
 
 		const originalTop = $('#chibisafe-lasso').style.top;
@@ -53,7 +56,8 @@ const captureFunctions = {
 		});
 	},
 	mouseup: event => {
-		if (event.which !== 1) return;
+		event.preventDefault();
+		if (event.button !== 0 && event.button !== 2) return;
 
 		document.body.classList.remove('chibisafe-filter');
 
@@ -64,8 +68,10 @@ const captureFunctions = {
 
 		setStyles('#chibisafe-lasso', {
 			display: 'none',
-			top: 0, left: 0,
-			height: 0, width: 0,
+			top: 0,
+			left: 0,
+			height: 0,
+			width: 0,
 		});
 
 		secondPos = {
@@ -81,13 +87,30 @@ const captureFunctions = {
 		document.removeEventListener('mousemove', captureFunctions.mousemove);
 		document.removeEventListener('mouseup', captureFunctions.mouseup);
 
-		setTimeout(() => browser.runtime.sendMessage({ coordinates: [firstPos, secondPos] }), 100);
+		setTimeout(() => {
+			document.removeEventListener('contextmenu', captureFunctions.contextmenu);
+
+			if (event.button !== 0) return;
+
+			browser.runtime.sendMessage({
+				action: 'screenshotCoordinates',
+				data: {
+					start: firstPos,
+					end: secondPos,
+				},
+			});
+		});
+	},
+	contextmenu: event => {
+		event.preventDefault();
 	},
 };
 
-browser.runtime.onMessage.addListener((request, sender) => {
-	switch (request) {
-		case 'select': {
+browser.runtime.onMessage.addListener(request => {
+	const { action, data } = request;
+
+	switch (action) {
+		case 'startScreenshotSelection': {
 			setStyles('body', {
 				cursor: 'crosshair',
 				userSelect: 'none',
@@ -98,10 +121,19 @@ browser.runtime.onMessage.addListener((request, sender) => {
 			document.addEventListener('mousedown', captureFunctions.mousedown);
 			document.addEventListener('mousemove', captureFunctions.mousemove);
 			document.addEventListener('mouseup', captureFunctions.mouseup);
+			document.addEventListener('contextmenu', captureFunctions.contextmenu);
+
+			break;
 		}
 
-		case 'check': {
+		case 'checkIfLoaded': {
 			return Promise.resolve(true);
 		}
+
+		default: {
+			return false;
+		}
 	}
+
+	return false;
 });

@@ -1,0 +1,32 @@
+{
+		"extends": [
+			"neon/common",
+			"neon/browser",
+			"neon/prettier"
+		],
+		"env": {
+			"browser": true,
+			"es6": true,
+			"webextensions": true
+		},
+		"ignorePatterns": [
+			"browser-polyfill.min.js"
+		],
+		"rules": {
+			"object-curly-spacing": 2,
+			"padded-blocks": 2,
+			"func-names": 0,
+			"id-length": 0,
+			"indent": [2, "tab", { "SwitchCase": 1 }],
+			"semi": [2, "always", { "omitLastInOneLineBlock": false }],
+			"semi-spacing": [2, { "before": false, "after": true }],
+			"semi-style": [2, "last"],
+			"comma-dangle": [2, "always-multiline"],
+			"consistent-return": 0,
+			"no-extra-semi": 2,
+			"no-multi-spaces": 2,
+			"no-trailing-spaces": 2,
+			"unicorn/numeric-separators-style": 0,
+			"import/no-absolute-path": 0
+		}
+	}
