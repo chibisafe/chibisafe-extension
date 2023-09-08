@@ -313,8 +313,7 @@ const Chibisafe = {
 		}
 
 		try {
-			// The albums endpoint is the only/easiest way to validate if the token is valid.
-			await this.fetch('/api/albums').then(res => res.json());
+			await this.fetch('/api/user/me').then(res => res.json());
 			return true;
 		} catch {
 			return false;
