@@ -98,7 +98,8 @@ const Helpers = {
 	},
 
 	get isFirefox() {
-		return typeof InstallTrigger !== 'undefined';
+		// idk if this is the best way to check if the browser is firefox but it works.
+		return browser.runtime.getURL('').includes('moz-extension://');
 	},
 };
 
