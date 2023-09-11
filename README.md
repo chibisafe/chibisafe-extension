@@ -23,15 +23,11 @@ The extension adds the following options to the context menu:
 ## Install
 
 <p>
-	<a href="https://chrome.google.com/webstore/detail/chibisafe-uploader/enkkmplljfjppcdaancckgilmgoiofnj">
-		<img src="https://raw.githubusercontent.com/alrra/browser-logos/ce0aac8/src/chrome/chrome.svg" valign="middle" height="55">
-		<img src="https://img.shields.io/chrome-web-store/v/enkkmplljfjppcdaancckgilmgoiofnj.svg" valign="middle">
-	</a>
-  &nbsp;
-  <a href="https://addons.mozilla.org/en-US/firefox/addon/chibisafe-uploader/">
-		<img src="https://raw.githubusercontent.com/alrra/browser-logos/ce0aac8/src/firefox/firefox.svg" valign="middle" height="55">
-		<img src="https://img.shields.io/amo/v/chibisafe-uploader.svg" valign="middle">
-	</a>
+	<a href="https://chrome.google.com/webstore/detail/chibisafe-uploader/enkkmplljfjppcdaancckgilmgoiofnj"><img src="https://raw.githubusercontent.com/alrra/browser-logos/ce0aac8/src/chrome/chrome.svg" valign="middle" height="55"></a>
+	<a href="https://chrome.google.com/webstore/detail/chibisafe-uploader/enkkmplljfjppcdaancckgilmgoiofnj"><img src="https://img.shields.io/chrome-web-store/v/enkkmplljfjppcdaancckgilmgoiofnj.svg" valign="middle"></a>
+	&nbsp;
+	<a href="https://addons.mozilla.org/en-US/firefox/addon/chibisafe-uploader/"><img src="https://raw.githubusercontent.com/alrra/browser-logos/ce0aac8/src/firefox/firefox.svg" valign="middle" height="55"></a>
+	<a href="https://addons.mozilla.org/en-US/firefox/addon/chibisafe-uploader/"><img src="https://img.shields.io/amo/v/chibisafe-uploader.svg" valign="middle"></a>
 </p>
 
 <p>
