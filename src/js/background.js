@@ -3,26 +3,37 @@
 const Helpers = {
 	get mimetypes() {
 		return {
-			'image/png': '.png',
-			'image/jpeg': '.jpg',
-			'image/webp': '.webp',
-			'image/svg+xml': '.svg',
-			'image/gif': '.gif',
-			'image/bmp': '.bmp',
-			'image/x-icon': '.ico',
-			'video/mp4': '.mp4',
-			'video/webm': '.webm',
-			'video/quicktime': '.mov',
-			'audio/mp4': '.mp4a',
-			'audio/mpeg': '.mp3',
-			'audio/ogg': '.ogg',
-			'audio/x-aac': '.aac',
-			'audio/x-wav': '.wav',
+			'image/png': 'png',
+			'image/jpeg': 'jpg',
+			'image/webp': 'webp',
+			'image/svg+xml': 'svg',
+			'image/gif': 'gif',
+			'image/bmp': 'bmp',
+			'image/x-icon': 'ico',
+			'video/mp4': 'mp4',
+			'video/webm': 'webm',
+			'video/quicktime': 'mov',
+			'audio/mp4': 'mp4a',
+			'audio/mpeg': 'mp3',
+			'audio/ogg': 'ogg',
+			'audio/x-aac': 'aac',
+			'audio/x-wav': 'wav',
 		};
 	},
 
-	fileExt(mimetype) {
-		return Helpers.mimetypes[mimetype] || `.${Helpers.mimetype.split('/')[1]}`;
+	fileExt(url, file) {
+		let fileExtension = Helpers.mimetypes[file.type];
+
+		if (!fileExtension) {
+			const potentialFilename = new URL(url).pathname.split('/').pop();
+			const ext = potentialFilename.split('.').pop();
+
+			if (Object.values(Helpers.mimetypes).includes(ext)) {
+				fileExtension = ext;
+			}
+		}
+
+		return fileExtension ? `.${fileExtension}` : '';
 	},
 
 	b64toBlob(b64Data, contentType = '', sliceSize = 512) {
@@ -538,8 +549,10 @@ const Chibisafe = {
 
 			refererHeader = null;
 
+			const fileExtension = Helpers.fileExt(url, image);
+
 			const formData = new FormData();
-			formData.append('file[]', image, `upload${Helpers.fileExt(image.type)}`);
+			formData.append('file[]', image, `upload${fileExtension}`);
 
 			const options = {
 				method: 'POST',
