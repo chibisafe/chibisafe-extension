@@ -348,7 +348,7 @@ const Chibisafe = {
 		}
 
 		try {
-			const data = await this.fetch('/api/albums').then(res => res.json());
+			const data = await this.fetch('/api/albums?limit=1000').then(res => res.json());
 
 			await Config.set({
 				albums: data.albums,
