@@ -504,6 +504,73 @@ const Chibisafe = {
 		}
 	},
 
+	async networkStorageUpload(image, filename, albumuuid) {
+		const mimetype = Object.entries(Helpers.mimetypes).find(entry => entry[1] === filename.split(".")[1])[0];
+		const options = {
+			method: 'POST',
+			body: JSON.stringify({
+				name: filename,
+				size: image.size,
+				contentType: mimetype,
+			}),
+			headers: {
+				'Content-Type': 'application/json'
+			},
+		};
+
+		const uploadInfo = await this.fetch('/api/upload', options).then(res => res.json());
+		const networkStorageOptions = {
+			method: 'PUT',
+			body: image,
+			headers: {
+				'Content-Type': mimetype
+			},
+		}
+		const request = new Request(uploadInfo.url, networkStorageOptions);
+		const req = await fetch(request);
+		if (!req.ok) {
+			throw req;
+		}
+		const processOptions = {
+			method: 'POST',
+			body: JSON.stringify({
+				identifier: uploadInfo.identifier,
+				type: mimetype,
+				name: filename
+			}),
+			headers: {
+				'Content-Type': 'application/json'
+			},
+		};
+		if (albumuuid) {
+			processOptions.headers.albumuuid = albumuuid;
+		}
+		return await this.fetch('/api/upload/process', processOptions).then(res => res.json());
+	},
+
+	async uploadHelper(blob, filename, albumuuid) {
+		const instanceSettingsOptions = {
+			method: 'GET',
+			headers: {}
+		}
+		const instanceSettings = await this.fetch('/api/settings', instanceSettingsOptions).then(res => res.json());
+		if (instanceSettings.useNetworkStorage) {
+			return await this.networkStorageUpload(blob, filename, albumuuid);
+		} else {
+			const formData = new FormData();
+			formData.append('file[]', blob, filename); 
+			const options = {
+				method: 'POST',
+				body: formData,
+				headers: {},
+			};
+			if (albumuuid) {
+				options.headers.albumuuid = albumuuid;
+			}
+			return await this.fetch('/api/upload', options).then(res => res.json());
+		}
+	},
+
 	async uploadFile(url, pageURL, tab, album) {
 		const config = await Config.getAll();
 
@@ -551,20 +618,11 @@ const Chibisafe = {
 
 			const fileExtension = Helpers.fileExt(url, image);
 
-			const formData = new FormData();
-			formData.append('file[]', image, `upload${fileExtension}`);
-
-			const options = {
-				method: 'POST',
-				body: formData,
-				headers: {},
-			};
-
+			let albumuuid;
 			if (album && config.token) {
-				options.headers.albumuuid = album.uuid;
+				albumuuid = album.uuid;
 			}
-
-			const fileData = await this.fetch('/api/upload', options).then(res => res.json());
+			const fileData = await this.uploadHelper(image, `upload${fileExtension}`, albumuuid);
 
 			const buttons = [{
 				title: 'Delete Upload',
@@ -612,14 +670,8 @@ const Chibisafe = {
 			requireInteraction: true,
 		});
 
-		const formData = new FormData();
-		formData.append('file[]', blob, 'upload.png');
-
 		try {
-			const fileData = await this.fetch('/api/upload', {
-				method: 'POST',
-				body: formData,
-			}).then(res => res.json());
+			const fileData = await this.uploadHelper(blob, 'upload.png');
 
 			const buttons = [{
 				title: 'Delete Upload',
