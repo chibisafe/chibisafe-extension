@@ -553,6 +553,9 @@ const Chibisafe = {
 
 			const formData = new FormData();
 			formData.append('file[]', image, `upload${fileExtension}`);
+			if (pageURL) {
+				formData.append('sourceUrl', pageURL);
+			}
 
 			const options = {
 				method: 'POST',
@@ -604,7 +607,7 @@ const Chibisafe = {
 		}
 	},
 
-	async uploadScreenshot(blob, tab) {
+	async uploadScreenshot(blob, tab, pageURL) {
 		const config = await Config.getAll();
 
 		const notification = new Notification({
@@ -614,6 +617,9 @@ const Chibisafe = {
 
 		const formData = new FormData();
 		formData.append('file[]', blob, 'upload.png');
+		if (pageURL) {
+			formData.append('sourceUrl', pageURL);
+		}
 
 		try {
 			const fileData = await this.fetch('/api/upload', {
@@ -708,7 +714,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 		case 'uploadScreenshot': {
 			const screenshot = await browser.tabs.captureVisibleTab({ format: 'png' });
 			const blob = Helpers.b64toBlob(screenshot.replace('data:image/png;base64,', ''), 'image/png');
-			Chibisafe.uploadScreenshot(blob, tab);
+			Chibisafe.uploadScreenshot(blob, tab, info.pageUrl);
 			break;
 		}
 
@@ -769,7 +775,7 @@ browser.runtime.onMessage.addListener(async (request, sender) => {
 
 			const croppedImage = await canvas.convertToBlob();
 
-			Chibisafe.uploadScreenshot(croppedImage, sender.tab);
+			Chibisafe.uploadScreenshot(croppedImage, sender.tab, sender.tab.url);
 
 			break;
 		}
