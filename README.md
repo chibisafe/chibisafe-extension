@@ -10,17 +10,16 @@ Chibisafe is an open-source self-hosted file hosting service that allows for fas
 
 ## Features
 
-The extension adds the following options to the context menu:
+The extension adds a new item in the browser context menu that allows you to:
+ - Send the currently select file to your safe
+ - Alternatively, upload it to a specific album
+ - Access to your chibisafe extension settings
 
-* `Send to safe`  
-  Uploads the media content that was right clicked to the configured chibisafe instance.
-* `Screenshot page/Screenshot selection`  
-  Takes a screenshot of the current page or selection and uploads it.
-* `Upload to album`  
-  Just like `Send to safe`, but allows you to select an album to upload to.
-  Requires that a user API key is configured.
+## Install new v3 extension
 
-## Install
+The new versions are not on the store yet, so if you want to install them right away you can download the [chrome](https://github.com/chibisafe/chibisafe-extension/actions/runs/22151355045/artifacts/5560202790) or the [firefox](https://github.com/chibisafe/chibisafe-extension/actions/runs/22151355045/artifacts/5560202909) version, unzip them, and load them as an unpackaged extension on your browser
+
+## Install old v2 version
 
 <p>
 	<a href="https://chrome.google.com/webstore/detail/chibisafe-uploader/enkkmplljfjppcdaancckgilmgoiofnj"><img src="https://raw.githubusercontent.com/alrra/browser-logos/ce0aac8/src/chrome/chrome.svg" valign="middle" height="55"></a>
@@ -39,9 +38,7 @@ The extension adds the following options to the context menu:
 If you want to build the extension yourself and use it as an unpackaged extension, you can do so by doing the following:
 
 * Clone the repository.
-* Run `npm install` to install dependencies.
-* Run `npm run build:chrome` or `npm run build:firefox` to build the extension.
+* Run `bun install` to install dependencies.
+* Run `bun run build` or `bun run build:firefox` to build the extension.
 
-The built extension will be located in the `.build` directory. Simply load this directory as an unpackaged extension in your browser.
-
-
+The built extension will be located in the `.output` directory. Load the appropriate subdirectory as an unpackaged extension in your browser.
