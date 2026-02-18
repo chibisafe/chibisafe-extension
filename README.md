@@ -17,7 +17,9 @@ The extension adds a new item in the browser context menu that allows you to:
 
 ## Install new v3 extension
 
-The new versions are not on the store yet, so if you want to install them right away you can download the [chrome](https://github.com/chibisafe/chibisafe-extension/actions/runs/22151355045/artifacts/5560202790) or the [firefox](https://github.com/chibisafe/chibisafe-extension/actions/runs/22151355045/artifacts/5560202909) version, unzip them, and load them as an unpackaged extension on your browser
+The new versions are not on the store yet, so if you want to install them right away you can download the [chrome](https://github.com/chibisafe/chibisafe-extension/actions/runs/22151355045/artifacts/5560202790) or the [firefox](https://github.com/chibisafe/chibisafe-extension/actions/runs/22151355045/artifacts/5560202909) version, unzip them, and load them as an unpackaged extension on your browser.
+
+These versions were built by a [GitHub workflow](https://github.com/chibisafe/chibisafe-extension/actions/runs/22151355045)
 
 ## Install old v2 version
 
