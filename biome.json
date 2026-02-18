@@ -1,0 +1,32 @@
+{
+	"files": {
+		"ignoreUnknown": false,
+		"ignore": ["node_modules"]
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"style": {
+				"noNonNullAssertion": "off"
+			}
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"useEditorconfig": true
+	},
+	"javascript": {
+		"globals": ["Bun", "window"],
+		"formatter": {
+			"arrowParentheses": "asNeeded",
+			"bracketSpacing": true,
+			"jsxQuoteStyle": "double",
+			"quoteStyle": "single",
+			"quoteProperties": "asNeeded",
+			"semicolons": "always",
+			"trailingCommas": "none",
+			"lineWidth": 120
+		}
+	}
+}
